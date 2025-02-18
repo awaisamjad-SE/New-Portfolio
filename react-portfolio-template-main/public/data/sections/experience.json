@@ -1,0 +1,76 @@
+{
+    "locales": {
+        "en": {
+            "title": "My **Experience**",
+            "title_long_prefix": "Summary of my",
+            "title_long": "**Work** Experience"
+        }
+    },
+    "articles": [
+        {
+            "id": "work",
+            "component": "ArticleTimeline",
+            "config": {},
+            "locales": {},
+            "items": [
+                {
+                    "icon": {
+                        "img": "images/pictures/place-1.png",
+                        "fa": "",
+                        "faColors": {"bg": null, "fill": null}
+                    },
+                    "dates": {
+                        "start": "06/01/2023",
+                        "end": "Present"
+                    },
+                    "locales": {
+                        "en": {
+                            "title": "Director of Content Management",
+                            "info": "Codator Society, UET",
+                            "text": "Led the content strategy for technical blogs, tutorials, and documentation on programming and web technologies. Organized tech workshops and training sessions on web development and AI applications. Managed and collaborated with developers, ensuring high-quality content delivery.",
+                            "tags": ["Content Management", "Technical Blogs", "Web Development", "AI", "Workshops"]
+                        }
+                    }
+                },
+                {
+                    "icon": {
+                        "img": "images/pictures/place-3.png",
+                        "fa": "",
+                        "faColors": {"bg": null, "fill": null}
+                    },
+                    "dates": {
+                        "start": "01/01/2023",
+                        "end": "Present"
+                    },
+                    "locales": {
+                        "en": {
+                            "title": "Full-Stack Development & Technical Consulting",
+                            "info": "University of Engineering and Technology",
+                            "text": "Developed an AI-powered course recommendation system using Django, React, and MongoDB. Built a full-stack e-learning platform integrating recommendation algorithms and user analytics. Designed and deployed responsive web applications using HTML, CSS, JavaScript, Vue.js, and React. Assisted students in debugging frontend & backend issues and optimizing.",
+                            "tags": ["Django", "React", "MongoDB", "AI", "Full-Stack Development", "Vue.js", "HTML", "CSS", "JavaScript"]
+                        }
+                    }
+                },
+                {
+                    "icon": {
+                        "img": "images/pictures/place-7.png",
+                        "fa": "",
+                        "faColors": {"bg": null, "fill": null}
+                    },
+                    "dates": {
+                        "start": "06/01/2022",
+                        "end": "08/01/2022"
+                    },
+                    "locales": {
+                        "en": {
+                            "title": "AI Intern",
+                            "info": "AIRL, KICS",
+                            "text": "Developed and trained Machine Learning & Deep Learning models under the supervision of Dr. Usman Ghani. Implemented a CNN model using Tensor Flow and Keras, optimizing accuracy on test datasets. Built a data preprocessing pipeline using Pandas, NumPy, and Matplotlib for dataset preparation. Worked in a Linux-based environment, ensuring scalability and performance optimization.",
+                            "tags": ["Machine Learning", "Deep Learning", "TensorFlow", "Keras", "Pandas", "NumPy", "Matplotlib"]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
