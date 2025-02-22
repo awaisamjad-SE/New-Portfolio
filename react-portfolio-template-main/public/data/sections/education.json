@@ -30,7 +30,7 @@
             "items": [
                 {
                     "icon": {
-                        "img": "https://seeklogo.com/images/U/uet-lahore-logo-5914237A23-seeklogo.com.png",
+                        "img": "images/pictures/uetlogo.png",
                         "fa": "",
                         "faColors": {"bg": null, "fill": null}
                     },
@@ -67,7 +67,7 @@
                 },
                 {
                     "icon": {
-                        "img": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRM2TchZicF3Miz6nO2J6ijk_NCchz6ZgPjHA&s",
+                        "img": "images/pictures/navttc.png",
                         "fa": "",
                         "faColors": {"bg": null, "fill": null}
                     },
@@ -77,7 +77,7 @@
                     },
                     "locales": {
                         "en": {
-                            "title": "**Master's** in Artificial Intelligence",
+                            "title": "6 Month's Course  in Artificial Intelligence",
                             "info": "National Vocational and Technical Training Commission",
                             "text": "<p>Completed a comprehensive Master's program focused on cutting-edge AI topics, including:</p> <ul><li>Machine Learning</li><li>Natural Language Processing (NLP)</li><li>Neural Networks</li></ul> <p class='mt-3'>Applied research and theory to develop practical AI-driven solutions, combining academic excellence with real-world innovation.</p>",
                             "tags": []

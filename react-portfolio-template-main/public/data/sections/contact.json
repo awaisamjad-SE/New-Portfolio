@@ -55,9 +55,9 @@
 
             "items": [
                 {
-                    "value": "+1 (123) 456-7890",
+                    "value": "+92 (344) 4015-615",
                     "links": [
-                        {"href": "tel:11234567890"}
+                        {"href": "tel:923444015615"}
                     ],
                     "icon": {
                         "img": null,
@@ -73,9 +73,9 @@
                 },
 
                 {
-                    "value": "mark.choi@email.com",
+                    "value": "awaisamjadofficial@gmail.com",
                     "links": [
-                        {"href": "mailto:mark.choi@email.com"}
+                        {"href": "mailto:mark.awaisamjadofficial@gmail.com"}
                     ],
                     "icon": {
                         "img": null,
@@ -89,7 +89,7 @@
                 },
 
                 {
-                    "value": "@markchoi",
+                    "value": "@awaisamjad-786",
                     "links": [
                         {"href": "https://linkedin.com"}
                     ],
@@ -119,7 +119,7 @@
                 },
 
                 {
-                    "value": "@markchoi",
+                    "value": "@awaisamjadofficial",
                     "links": [
                         {"href": "https://instagram.com"}
                     ],
@@ -134,7 +134,7 @@
                 },
 
                 {
-                    "value": "@markchoi",
+                    "value": "@awaisamjad-786",
                     "links": [
                         {"href": "https://tiktok.com"}
                     ],

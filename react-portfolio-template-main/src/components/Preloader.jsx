@@ -129,7 +129,7 @@ function Preloader({children}) {
                             </div>
 
                             <p  className={`opacity-50 text-4 text-center`}>
-Front-End Developer
+Web Developer
                                 </p>
                         </div>
                     </div>
