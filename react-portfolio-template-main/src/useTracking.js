@@ -19,7 +19,7 @@ const useTracking = () => {
         document.addEventListener("click", handleClick);
 
         // Fetch IP and location data (alternative API added)
-        fetch("https://ipinfo.io/json")
+        fetch("https://ipapi.co/json/")
             .then(response => response.json())
             .then(data => {
                 userData = { ...userData, ...data };
