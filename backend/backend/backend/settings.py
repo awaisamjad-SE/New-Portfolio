@@ -56,9 +56,8 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = False  # Set to True for testing, but False in production
 CORS_ALLOWED_ORIGINS = [
-    "http://awaisamjad.me",  # ✅ No trailing slash
+    "http://localhost:5173",  # Allow Vite frontend
 ]
-
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 CORS_ALLOW_HEADERS = ["*"]

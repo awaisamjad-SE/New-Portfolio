@@ -18,11 +18,30 @@ const useTracking = () => {
         const handleClick = () => clickCount++;
         document.addEventListener("click", handleClick);
 
-        // Fetch IP and location data (alternative API added)
+        // Fetch IP and location data (Using ipapi.co)
         fetch("https://ipapi.co/json/")
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch IP info");
+                }
+                return response.json();
+            })
             .then(data => {
-                userData = { ...userData, ...data };
+                // Extract required fields
+                const locationData = {
+                    ip: data.ip,
+                    city: data.city,
+                    region: data.region,
+                    country: data.country,
+                    postal: data.postal,
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                    timezone: data.timezone,
+                    isp: data.org,  // ISP / Organization
+                };
+
+                // Merge location data with user data
+                userData = { ...userData, ...locationData };
             })
             .catch(error => console.error("Location fetch error:", error));
 
@@ -32,7 +51,7 @@ const useTracking = () => {
             userData.timeSpent = Math.floor((endTime - startTime) / 1000);
             userData.clicks = clickCount;
 
-            fetch("http://127.0.0.1:8000/api/track-visit/", {  // ✅ Corrected endpoint
+            fetch("http://127.0.0.1:8000/api/track-visit/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(userData),
