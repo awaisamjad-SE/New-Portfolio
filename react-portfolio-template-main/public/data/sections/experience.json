@@ -34,20 +34,20 @@
                 },
                 {
                     "icon": {
-                        "img": "images/pictures/uetlogo.png",
+                        "img": "images/pictures/image.png",
                         "fa": "",
                         "faColors": {"bg": null, "fill": null}
                     },
                     "dates": {
-                        "start": "01/01/2023",
+                        "start": "03/15/2025",
                         "end": "Present"
                     },
                     "locales": {
                         "en": {
-                            "title": "Full-Stack Development & Technical Consulting",
-                            "info": "University of Engineering and Technology",
-                            "text": "Developed an AI-powered course recommendation system using Django, React, and MongoDB. Built a full-stack e-learning platform integrating recommendation algorithms and user analytics. Designed and deployed responsive web applications using HTML, CSS, JavaScript, Vue.js, and React. Assisted students in debugging frontend & backend issues and optimizing.",
-                            "tags": ["Django", "React", "MongoDB", "AI", "Full-Stack Development", "Vue.js", "HTML", "CSS", "JavaScript"]
+                            "title": "Python Programming Instructor",
+                            "info": "Aspire Group of Colleges (NAVTTC Program)",
+                            "text": "Conducted hands-on training sessions on Python programming for students enrolled in the NAVTTC program. Designed and delivered a structured curriculum covering Python fundamentals, data structures, and algorithms. Guided students in developing real-world projects, including automation scripts and data analysis applications. Mentored students on best coding practices, debugging techniques, and problem-solving skills.",
+                            "tags": ["Python", "Teaching", "NAVTTC", "Programming"]
                         }
                     }
                 },

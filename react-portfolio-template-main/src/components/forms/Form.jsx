@@ -15,7 +15,7 @@ function Form({ children, id, submitLabel, submitIcon, onSubmit }) {
         const data = Object.fromEntries(formData.entries());
 
         try {
-            const response = await fetch('http://localhost:3001/send-email', {
+            const response = await fetch('', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

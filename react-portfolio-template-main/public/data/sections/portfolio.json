@@ -34,27 +34,27 @@
 
             "categories": [
                 {
-                    "id": "apps",
+                    "id": "Django",
                     "locales": {
-                        "en": {"singular": "App", "plural": "Apps"},
-                        "es": {"singular": "App", "plural": "Apps"},
-                        "fr": {"singular": "App", "plural": "Apps"},
+                        "en": {"singular": "Django", "plural": "Django"},
+                        "es": {"singular": "Django", "plural": "Django"},
+                        "fr": {"singular": "Django", "plural": "Django"},
                         "ko": {"singular": "앱", "plural": "앱들"}
                     }
                 },
                 {
-                    "id": "websites",
+                    "id": " Wordpress",
                     "locales": {
-                        "en": {"singular": "Website", "plural": "Web"},
-                        "es": {"singular": "Sitio web", "plural": "Web"},
-                        "fr": {"singular": "Site web", "plural": "Web"},
+                        "en": {"singular": "Wordpress", "plural": " Wordpress"},
+                        "es": {"singular": "Sitio web", "plural": "Wordpress"},
+                        "fr": {"singular": "Site web", "plural": "Wordpress"},
                         "ko": {"singular": "웹사이트", "plural": "웹"}
                     }
                 },
                 {
-                    "id": "utilities",
+                    "id": "Other",
                     "locales": {
-                        "en": {"singular": "Utility", "plural": "Utilities"},
+                        "en": {"singular": "Other", "plural": "Other"},
                         "es": {"singular": "Utilidad", "plural": "Utilidades"},
                         "fr": {"singular": "Utilitaire", "plural": "Utilitaires"},
                         "ko": {"singular": "유틸리티", "plural": "유틸리티들"}
@@ -64,7 +64,7 @@
 
             "items": [
                 {
-                    "categoryId": "utilities",
+                    "categoryId": "Other",
                     "icon": {
                         "img": "images/pictures/project-logo-3.png",
                         "fa": "",
@@ -86,9 +86,9 @@
 
                     "locales": {
                         "en": {
-                            "title": "BrainPulse",
-                            "text": "A <b>RESTful API</b> backend built with <b>Node.js</b>, designed for high-performance data processing and real-time event handling.",
-                            "tags": ["API", "REST", "Backend"]
+                            "title": "EduMeUp LMS",
+                            "text": "A <b>Moodle-based Learning Management System (LMS)</b> designed for <b>O-Level students</b>, providing structured courses, quizzes, and interactive learning experiences with progress tracking.",
+                            "tags": ["Moodle", "LMS", "E-learning", "O-Level", "Online Education"]
                         },
                         "es": {
                             "title": "BrainPulse",
@@ -109,7 +109,7 @@
                 },
 
                 {
-                    "categoryId": "apps",
+                    "categoryId": "Django",
                     "icon": {
                         "img": "images/pictures/project-logo-7.png",
                         "fa": "",
@@ -137,9 +137,9 @@
 
                     "locales": {
                         "en": {
-                            "title": "MailM8",
-                            "text": "A cross-platform email client built with <b>Flutter</b>, providing efficient communication with an intuitive UI for <b>managing emails</b>.",
-                            "tags": ["Flutter", "E-mail", "Communication"]
+                            "title": "Email Spam Classifier",
+                            "text": "An AI-driven <b>spam detection system</b> utilizing <b>Natural Language Processing (NLP)</b> and <b>Machine Learning</b> to classify emails as spam or ham, enhancing email security and filtering.",
+                            "tags": ["AI", "NLP", "Machine Learning", "Email Security", "Spam Detection"]                        
                         },
                         "es": {
                             "title": "MailM8",
@@ -160,7 +160,7 @@
                 },
 
                 {
-                    "categoryId": "apps",
+                    "categoryId": "Django",
                     "icon": {
                         "img": "images/pictures/project-logo-6.png",
                         "fa": "",
@@ -186,9 +186,10 @@
 
                     "locales": {
                         "en": {
-                            "title": "Stackers",
-                            "text": "A fully-featured productivity app developed with <b>React Native</b>, enabling users to organize tasks, notes, and projects across multiple devices. It offers <b>cloud sync</b>, intuitive UI, and collaboration features.",
-                            "tags": ["React", "Organization", "Notes"]
+                            "title": "Crowd Detection System",
+                            "text": "An AI-powered <b>real-time crowd monitoring</b> system using <b>OpenCV</b> and <b>Machine Learning</b> to analyze human density in different environments, enhancing safety and management.",
+                            "tags": ["AI", "OpenCV", "Machine Learning", "Crowd Monitoring", "Real-time Detection"]
+                        
                         },
                         "es": {
                             "title": "Stackers",
@@ -209,7 +210,7 @@
                 },
 
                 {
-                    "categoryId": "websites",
+                    "categoryId": " Wordpress",
                     "icon": {
                         "img": "images/pictures/project-logo-1.png",
                         "fa": "",
@@ -230,18 +231,18 @@
 
                     "locales": {
                         "en": {
-                            "title": "SmartCash",
-                            "text": "A finance website built using <b>Next.js</b>, allowing users to <b>track budgets</b> and manage their money with interactive charts and insights.",
-                            "tags": ["Next.js", "Finance", "Money"]
+                            "title": "ZenithZone Shop",
+                            "text": "A <b>WordPress-based eCommerce platform</b> designed for <b>dropshipping</b>, offering a seamless shopping experience with secure payments, product management, and customer engagement features.",
+                            "tags": ["WordPress", "E-commerce", "Dropshipping", "Online Store"]
                         },
                         "es": {
                             "title": "SmartCash",
-                            "text": "Un sitio web financiero construido con <b>Next.js</b>, que permite a los usuarios <b>seguir presupuestos</b> y gestionar su dinero con gráficos interactivos e ideas.",
+                            "text": "Un sitio  Wordpressfinanciero construido con <b>Next.js</b>, que permite a los usuarios <b>seguir presupuestos</b> y gestionar su dinero con gráficos interactivos e ideas.",
                             "tags": ["Next.js", "Finanzas", "Dinero"]
                         },
                         "fr": {
                             "title": "SmartCash",
-                            "text": "Un site web financier construit avec <b>Next.js</b>, permettant aux utilisateurs de <b>suivre les budgets</b> et de gérer leur argent avec des graphiques interactifs et des analyses.",
+                            "text": "Un site  Wordpressfinancier construit avec <b>Next.js</b>, permettant aux utilisateurs de <b>suivre les budgets</b> et de gérer leur argent avec des graphiques interactifs et des analyses.",
                             "tags": ["Next.js", "Finance", "Argent"]
                         },
                         "ko": {
@@ -253,7 +254,7 @@
                 },
 
                 {
-                    "categoryId": "apps",
+                    "categoryId": "Django",
                     "icon": {
                         "img": "images/pictures/project-logo-2.png",
                         "fa": "",
@@ -275,9 +276,9 @@
 
                     "locales": {
                         "en": {
-                            "title": "Snappy",
-                            "text": "A powerful photography app designed with <b>Swift</b> for iOS and Android, featuring <b>advanced camera controls</b>, editing tools, and AI-powered filters for quick photo enhancements.",
-                            "tags": ["Swift", "Photography", "Camera"]
+                            "title": "Face Recognition System",
+                            "text": "An <b>AI-powered authentication system</b> built with <b>OpenCV</b> and <b>Deep Learning</b>, designed for secure access control and identity verification. Currently under development.",
+                            "tags": ["AI", "OpenCV", "Deep Learning", "Authentication", "Security"]                        
                         },
                         "es": {
                             "title": "Snappy",
@@ -298,7 +299,7 @@
                 },
 
                 {
-                    "categoryId": "websites",
+                    "categoryId": " Wordpress",
                     "icon": {
                         "img": "images/pictures/project-logo-5.png",
                         "fa": "",
@@ -319,13 +320,13 @@
 
                     "locales": {
                         "en": {
-                            "title": "Sweet Scoops",
-                            "text": "A recipe website built with <b>WordPress</b> and WooCommerce, featuring a rich collection of <b>dessert recipes</b> and an integrated e-commerce platform.",
-                            "tags": ["WooCommerce", "Food", "Desserts"]
+                            "title": "LuzeWears",
+                            "text": "A <b>WordPress-based eCommerce platform</b> built for a newly launched <b>clothing brand</b>, offering a stylish and user-friendly shopping experience with secure checkout and product showcase.",
+                            "tags": ["WordPress", "E-commerce", "Fashion", "Clothing Brand", "Online Store"]
                         },
                         "es": {
                             "title": "Sweet Scoops",
-                            "text": "Un sitio web de recetas construido con <b>WordPress</b> y WooCommerce, con una rica colección de <b>recetas de postres</b> y una plataforma de comercio electrónico integrada.",
+                            "text": "Un sitio  Wordpressde recetas construido con <b>WordPress</b> y WooCommerce, con una rica colección de <b>recetas de postres</b> y una plataforma de comercio electrónico integrada.",
                             "tags": ["WooCommerce", "Comida", "Postres"]
                         },
                         "fr": {
@@ -342,7 +343,7 @@
                 },
 
                 {
-                    "categoryId": "websites",
+                    "categoryId": " Wordpress",
                     "icon": {
                         "img": null,
                         "fa": "fa-solid fa-guitar",
@@ -363,18 +364,18 @@
 
                     "locales": {
                         "en": {
-                            "title": "RockVerse",
-                            "text": "A dynamic music and entertainment website developed with <b>Django</b>, showcasing rock music news, events, and <b>streaming content</b>.",
-                            "tags": ["Django", "Music", "Rock"]
+                            "title": "EduMeUp",
+                            "text": "An <b>e-learning platform</b> designed for <b>O-Level students</b>, offering interactive courses, assessments, and study resources to enhance learning through a user-friendly interface.",
+                            "tags": ["E-learning", "Education", "O-Level", "Online Courses", "Study Platform"]
                         },
                         "es": {
                             "title": "RockVerse",
-                            "text": "Un sitio web dinámico de música y entretenimiento desarrollado con <b>Django</b>, que muestra noticias de música rock, eventos y <b>contenido en streaming</b>.",
+                            "text": "Un sitio  Wordpressdinámico de música y entretenimiento desarrollado con <b>Django</b>, que muestra noticias de música rock, eventos y <b>contenido en streaming</b>.",
                             "tags": ["Django", "Música", "Rock"]
                         },
                         "fr": {
                             "title": "RockVerse",
-                            "text": "Un site web de musique et de divertissement dynamique développé avec <b>Django</b>, mettant en avant des nouvelles, événements et <b>contenu en streaming</b> sur le rock.",
+                            "text": "Un site  Wordpressde musique et de divertissement dynamique développé avec <b>Django</b>, mettant en avant des nouvelles, événements et <b>contenu en streaming</b> sur le rock.",
                             "tags": ["Django", "Musique", "Rock"]
                         },
                         "ko": {
@@ -385,51 +386,9 @@
                     }
                 },
 
-                {
-                    "categoryId": "utilities",
-                    "icon": {
-                        "img": "images/pictures/project-logo-4.png",
-                        "fa": "",
-                        "faColors": {"bg": null, "fill": null}
-                    },
-
-                    "links": [
-                    ],
-
-                    "media": {
-                        "youtubeVideo": "https://www.youtube.com/watch?v=bf3Lz33nHy0",
-                        "screenshots": {
-                            "aspectRatio": null,
-                            "images": []
-                        }
-                    },
-
-                    "locales": {
-                        "en": {
-                            "title": "Soccer Analytics",
-                            "text": "An AI-powered sports analytics platform built with <b>Python</b> and <b>TensorFlow</b>, offering detailed soccer <b>predictions</b> and team management tools.",
-                            "tags": ["AI", "Prediction", "Soccer"]
-                        },
-                        "es": {
-                            "title": "Soccer Analytics",
-                            "text": "Una plataforma de análisis deportivo impulsada por IA construida con <b>Python</b> y <b>TensorFlow</b>, que ofrece <b>predicciones</b> detalladas de fútbol y herramientas de gestión de equipos.",
-                            "tags": ["IA", "Predicción", "Fútbol"]
-                        },
-                        "fr": {
-                            "title": "Soccer Analytics",
-                            "text": "Une plateforme d'analytique sportive alimentée par IA construite avec <b>Python</b> et <b>TensorFlow</b>, offrant des <b>prédictions</b> détaillées pour le football et des outils de gestion d'équipe.",
-                            "tags": ["IA", "Prédiction", "Football"]
-                        },
-                        "ko": {
-                            "title": "Soccer Analytics",
-                            "text": "<b>Python</b> 및 <b>TensorFlow</b>로 구축된 AI 기반 스포츠 분석 플랫폼으로, 축구에 대한 <b>예측</b> 및 팀 관리 도구를 제공합니다.",
-                            "tags": ["AI", "예측", "축구"]
-                        }
-                    }
-                },
 
                 {
-                    "categoryId": "apps",
+                    "categoryId": "Django",
                     "icon": {
                         "img": "",
                         "fa": "fa-solid fa-truck-fast",
@@ -452,9 +411,9 @@
 
                     "locales": {
                         "en": {
-                            "title": "QuickDrop",
-                            "text": "A cross-platform delivery app built with <b>React Native</b> and a <b>Node.js backend</b>, featuring <b>real-time tracking</b> and seamless integration with multiple platforms.",
-                            "tags": ["React Native", "Delivery", "Real-Time Tracking"]
+                            "title": "Face Recognition System",
+                            "text": "An <b>AI-powered authentication system</b> built with <b>OpenCV</b> and <b>Deep Learning</b>, designed for secure access control and identity verification. Currently under development.",
+                            "tags": ["AI", "OpenCV", "Deep Learning", "Authentication", "Security"]                        
                         },
                         "es": {
                             "title": "QuickDrop",
