@@ -16,5 +16,51 @@
   <body style="background-color: #111">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+function sendTrackingData() {
+  const data = {
+    timestamp: new Date().toISOString(),
+    pageUrl: window.location.href,
+    referrer: document.referrer || '',
+    screenResolution: `${window.screen.width}x${window.screen.height}`,
+    deviceType: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+    language: navigator.language,
+    browser: navigator.userAgent,
+    utmParams: {
+      utm_source: getParameterByName('utm_source'),
+      utm_medium: getParameterByName('utm_medium'),
+      utm_campaign: getParameterByName('utm_campaign')
+    },
+    timeOnPage: 0,   // You can update this later
+    scrollDepth: ''
+  };
+
+  fetch('https://octopus-app-qevgj.ondigitalocean.app/api/track/', {  // Replace with your backend URL
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  }).then(res => res.json())
+    .then(response => console.log('Tracking saved:', response))
+    .catch(err => console.error('Tracking error:', err));
+}
+
+// Helper to get URL query parameters (for UTM)
+function getParameterByName(name) {
+  const url = window.location.href;
+  name = name.replace(/[\\[\\]]/g, '\\$&');
+  const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+  const results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+// Send tracking when page loads
+window.addEventListener('load', sendTrackingData);
+
+</script>
+
   </body>
 </html>
