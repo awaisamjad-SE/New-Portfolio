@@ -16,48 +16,6 @@
   <body style="background-color: #111">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-<script>
-(function () {
-  const startTime = Date.now();
-  let clickCount = 0;
-  const WEB_ID = "awaisamjad.me";  // <- change to match your website ID
 
-  function getDeviceId() {
-    let deviceId = localStorage.getItem("analytics_device_id");
-    if (!deviceId) {
-      deviceId = 'device-' + Math.random().toString(36).substring(2, 12);
-      localStorage.setItem("analytics_device_id", deviceId);
-    }
-    return deviceId;
-  }
-
-  document.addEventListener("click", () => clickCount++);
-
-  window.addEventListener("beforeunload", function () {
-    const timeOnPage = Math.round((Date.now() - startTime) / 1000);
-    const screenResolution = `${window.screen.width}x${window.screen.height}`;
-    const utmParams = {};
-    const params = new URLSearchParams(window.location.search);
-    for (const [key, value] of params.entries()) {
-      if (key.startsWith("utm_")) utmParams[key] = value;
-    }
-
-    navigator.sendBeacon("https://octopus-app-qevgj.ondigitalocean.app/api/track/", JSON.stringify({
-      web_id: WEB_ID,
-      device_id: getDeviceId(),
-      pageUrl: window.location.href,
-      referrer: document.referrer,
-      screenResolution,
-      deviceType: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
-      language: navigator.language,
-      browser: navigator.userAgent,
-      utmParams,
-      timeOnPage,
-      clicks: clickCount
-    }));
-  });
-})();
-</script>
-
-  </body>
+</body>
 </html>

@@ -1,73 +1,53 @@
 import { useEffect } from "react";
 
-const useTracking = () => {
-    useEffect(() => {
-        let startTime = Date.now();
-        let clickCount = 0;
+export default function useTracking() {
+  useEffect(() => {
+    const WEB_ID = "softsincs.com";
+    const startTime = Date.now();
+    let clickCount = 0;
 
-        // Capture initial user data
-        let userData = {
-            browser: navigator.userAgent,
-            language: navigator.language,
-            deviceType: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
-            screenResolution: `${window.screen.width}x${window.screen.height}`,
-            referrer: document.referrer || "Direct",
-        };
+    function getDeviceId() {
+      let id = localStorage.getItem("analytics_device_id");
+      if (!id) {
+        id = "device-" + Math.random().toString(36).substr(2, 10);
+        localStorage.setItem("analytics_device_id", id);
+      }
+      return id;
+    }
 
-        // Track user clicks
-        const handleClick = () => clickCount++;
-        document.addEventListener("click", handleClick);
+    function handleClick() {
+      clickCount++;
+    }
 
-        // Fetch IP and location data (Using ipapi.co)
-        fetch("https://ipapi.co/json/")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Failed to fetch IP info");
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Extract required fields
-                const locationData = {
-                    ip: data.ip,
-                    city: data.city,
-                    region: data.region,
-                    country: data.country,
-                    postal: data.postal,
-                    latitude: data.latitude,
-                    longitude: data.longitude,
-                    timezone: data.timezone,
-                    isp: data.org,  // ISP / Organization
-                };
+    function handleBeforeUnload() {
+      const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+      const payload = {
+        web_id: WEB_ID,
+        device_id: getDeviceId(),
+        pageUrl: window.location.href,
+        referrer: document.referrer,
+        screenResolution: `${window.screen.width}x${window.screen.height}`,
+        deviceType: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
+        language: navigator.language,
+        browser: navigator.userAgent,
+        utmParams: {},
+        timeOnPage: timeSpent,
+        clicks: clickCount,
+      };
 
-                // Merge location data with user data
-                userData = { ...userData, ...locationData };
-            })
-            .catch(error => console.error("Location fetch error:", error));
+      fetch("https://octopus-app-qevgj.ondigitalocean.app/api/track/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
 
-        // Send data when the user leaves
-        const sendData = () => {
-            let endTime = Date.now();
-            userData.timeSpent = Math.floor((endTime - startTime) / 1000);
-            userData.clicks = clickCount;
+    document.addEventListener("click", handleClick);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
-            fetch("http://127.0.0.1:8000/api/track-visit/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(userData),
-            })
-                .then(response => response.json())
-                .then(data => console.log("Tracking data sent successfully:", data))
-                .catch(error => console.error("Data send error:", error));
-        };
-
-        window.addEventListener("beforeunload", sendData);
-
-        return () => {
-            document.removeEventListener("click", handleClick);
-            window.removeEventListener("beforeunload", sendData);
-        };
-    }, []);
-};
-
-export default useTracking;
+    return () => {
+      document.removeEventListener("click", handleClick);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+}
