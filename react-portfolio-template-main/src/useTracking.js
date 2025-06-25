@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 export default function useTracking() {
   useEffect(() => {
-    const WEB_ID = "softsincs.com";
+    const WEB_ID = "awaisamjad.me";
     const startTime = Date.now();
     let clickCount = 0;
 
