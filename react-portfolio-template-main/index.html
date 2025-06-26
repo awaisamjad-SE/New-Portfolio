@@ -16,6 +16,57 @@
   <body style="background-color: #111">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+<script>
+(function () {
+  console.log("Tracking initialized...");
+
+  const WEB_ID = "awaisamjad.me"; // Update as needed dynamically if you want
+  const startTime = Date.now();
+  let clickCount = 0;
+
+  function getDeviceId() {
+    let id = localStorage.getItem("analytics_device_id");
+    if (!id) {
+      id = "device-" + Math.random().toString(36).substr(2, 10);
+      localStorage.setItem("analytics_device_id", id);
+    }
+    return id;
+  }
+
+  const deviceId = getDeviceId();
+
+  document.addEventListener("click", () => {
+    clickCount++;
+  });
+
+  window.addEventListener("beforeunload", () => {
+    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+
+    const payload = {
+      web_id: WEB_ID,
+      device_id: deviceId,
+      pageUrl: window.location.href,
+      referrer: document.referrer,
+      screenResolution: `${window.screen.width}x${window.screen.height}`,
+      deviceType: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
+      language: navigator.language,
+      browser: navigator.userAgent,
+      utmParams: {}, // Can enhance to parse real UTM params if needed
+      timeOnPage: timeSpent,
+      clicks: clickCount,
+    };
+
+    console.log("Sending tracking data...", payload);
+
+    navigator.sendBeacon(
+      "https://octopus-app-qevgj.ondigitalocean.app/api/track/", // <-- Use your actual Django endpoint here
+      JSON.stringify(payload)
+    );
+  });
+
+  console.log("Tracking script loaded successfully.");
+})();
+</script>
 
 </body>
 </html>

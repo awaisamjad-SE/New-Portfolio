@@ -10,10 +10,8 @@ import GalleryModal from "/src/components/modals/GalleryModal.jsx"
 import Notifications from "/src/components/feedbacks/Notifications.jsx"
 import ConfirmationWindow from "/src/components/modals/ConfirmationWindow.jsx"
 import {useFeedbacks} from "/src/providers/FeedbacksProvider.jsx"
-import useTracking from "../useTracking"; // Import the tracking hook
 
 function App() {
-    useTracking(); // Activate tracking
     const {listImagesForCache} = useData()
 
     const imageList = listImagesForCache()
