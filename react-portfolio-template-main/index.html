@@ -17,10 +17,10 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 <script>
-(function () {
-  console.log("Tracking initialized...");
+(async function () {
+  console.log("✅ Tracking initialized...");
 
-  const WEB_ID = "awaisamjad.me"; // Update as needed dynamically if you want
+  const WEB_ID = "awaisamjad.me"; // Set your domain or unique ID
   const startTime = Date.now();
   let clickCount = 0;
 
@@ -35,9 +35,21 @@
 
   const deviceId = getDeviceId();
 
+  // Count clicks
   document.addEventListener("click", () => {
     clickCount++;
   });
+
+  // Optional: Fetch GeoIP info from public IP services
+  let locationInfo = {};
+  try {
+    const res = await fetch("https://ipinfo.io/json?token=098e59b6306494"); // Replace with real token
+    if (res.ok) {
+      locationInfo = await res.json();
+    }
+  } catch (err) {
+    console.warn("🌐 Failed to get location info:", err);
+  }
 
   window.addEventListener("beforeunload", () => {
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
@@ -51,20 +63,24 @@
       deviceType: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
       language: navigator.language,
       browser: navigator.userAgent,
-      utmParams: {}, // Can enhance to parse real UTM params if needed
+      utmParams: {},
       timeOnPage: timeSpent,
       clicks: clickCount,
+      ip: locationInfo.ip || "", // Optional if backend grabs IP
+      locationInfo: locationInfo || {}
     };
 
-    console.log("Sending tracking data...", payload);
+    console.log("📦 Sending payload...", payload);
 
-    navigator.sendBeacon(
-      "https://octopus-app-qevgj.ondigitalocean.app/api/track/", // <-- Use your actual Django endpoint here
-      JSON.stringify(payload)
-    );
+    try {
+      const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+      navigator.sendBeacon("https://octopus-app-qevgj.ondigitalocean.app/api/track/", blob);
+    } catch (e) {
+      console.error("❌ Failed to send tracking data:", e);
+    }
   });
 
-  console.log("Tracking script loaded successfully.");
+  console.log("✅ Tracking script loaded.");
 })();
 </script>
 
