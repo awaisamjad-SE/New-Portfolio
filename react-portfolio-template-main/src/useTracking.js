@@ -4,7 +4,7 @@ export default function useTracking() {
   useEffect(() => {
     console.log("Tracking initialized...");
 
-    const WEB_ID = "SoftMailer-Analytics-001";
+    const WEB_ID = "awaisamjad.me";
     const startTime = Date.now();
     let clickCount = 0;
 
