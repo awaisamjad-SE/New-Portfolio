@@ -1,0 +1,102 @@
+{
+  "info": {
+    "name": "Hostel Backend - Postman Collection",
+    "_postman_id": "a1b2c3d4-hostel-backend",
+    "description": "Collection for testing Hostel Management System APIs (local dev: http://localhost:5000)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Admin - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"adminPassword\"\n}"
+        },
+        "url": { "raw": "http://localhost:5000/api/admin/login", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","admin","login"] }
+      },
+      "response": [
+        {
+          "name": "Login success (example)",
+          "originalRequest": {},
+          "status": "OK",
+          "code": 200,
+          "_body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": { \"token\": \"{{jwt}}\" }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Admin - Create (admin only)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{jwt}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"admin_id\": \"ADM001\",\n  \"name\": \"Initial Admin\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"adminPassword\"\n}" },
+        "url": { "raw": "http://localhost:5000/api/admin/create", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","admin","create"] }
+      },
+      "response": [ { "name": "Admin created (example)", "originalRequest": {}, "status": "Created", "code": 201, "_body": "{\n  \"success\": true,\n  \"message\": \"Admin created\",\n  \"data\": { \"id\": \"<mongo_id>\" }\n}" } ]
+    },
+    {
+      "name": "Students - Create (admin)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{jwt}}" }
+        ],
+        "body": { "mode": "raw", "raw": "{\n  \"student_id\": \"STU002\",\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"pass123\",\n  \"department\": \"CSE\"\n}" },
+        "url": { "raw": "http://localhost:5000/api/students/create", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","students","create"] }
+      },
+      "response": [ { "name": "Student created (example)", "originalRequest": {}, "status": "Created", "code": 201, "_body": "{\n  \"success\": true,\n  \"message\": \"Student created\",\n  \"data\": { \"id\": \"<mongo_id>\" }\n}" } ]
+    },
+    {
+      "name": "Students - Get all (admin)",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{jwt}}" } ],
+        "url": { "raw": "http://localhost:5000/api/students/get", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","students","get"] }
+      },
+      "response": [ { "name": "Students list (example)", "originalRequest": {}, "status": "OK", "code": 200, "_body": "{\n  \"success\": true,\n  \"message\": \"Students list\",\n  \"data\": [ { \"student_id\": \"STU002\", \"name\": \"John Doe\" } ]\n}" } ]
+    },
+    {
+      "name": "FoodItems - Create (admin)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{jwt}}" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"food_id\": \"F001\",\n  \"name\": \"Rice\",\n  \"category\": \"Main\",\n  \"price\": 60\n}" },
+        "url": { "raw": "http://localhost:5000/api/fooditems/create", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","fooditems","create"] }
+      },
+      "response": [ { "name": "Food created (example)", "originalRequest": {}, "status": "Created", "code": 201, "_body": "{\n  \"success\": true,\n  \"message\": \"Food item created\",\n  \"data\": { \"food_id\": \"F001\", \"name\": \"Rice\" }\n}" } ]
+    },
+    {
+      "name": "DailyMeals - Add (admin)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{jwt}}" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"student_id\": \"STU002\",\n  \"food_id\": \"F001\",\n  \"quantity\": 1,\n  \"date\": \"2025-10-27T00:00:00.000Z\"\n}" },
+        "url": { "raw": "http://localhost:5000/api/dailymeals/add", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","dailymeals","add"] }
+      },
+      "response": [ { "name": "Daily meal added (example)", "originalRequest": {}, "status": "Created", "code": 201, "_body": "{\n  \"success\": true,\n  \"message\": \"Daily meal added\",\n  \"data\": { \"student_id\": \"STU002\", \"food_id\": \"F001\" }\n}" } ]
+    },
+    {
+      "name": "Payments - Generate (admin)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{jwt}}" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"student_id\": \"STU002\",\n  \"month\": \"2025-10\",\n  \"total_food_price\": 500,\n  \"mess_service_charge\": 1500,\n  \"variable_expenses\": 100\n}" },
+        "url": { "raw": "http://localhost:5000/api/payments/generate", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","payments","generate"] }
+      },
+      "response": [ { "name": "Payment generated (example)", "originalRequest": {}, "status": "Created", "code": 201, "_body": "{\n  \"success\": true,\n  \"message\": \"Payment generated\",\n  \"data\": { \"student_id\": \"STU002\", \"month\": \"2025-10\" }\n}" } ]
+    }
+  ],
+  "event": [],
+  "variable": [
+    { "key": "jwt", "value": "<PASTE_YOUR_JWT_HERE>" }
+  ]
+}

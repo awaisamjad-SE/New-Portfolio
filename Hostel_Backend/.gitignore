@@ -1,0 +1,47 @@
+# Node
+node_modules/
+npm-debug.log*
+# dotenv
+.env
+.env.*
+# Logs
+logs/
+*.log
+pids/
+*.pid
+*.seed
+# Runtime
+dist/
+build/
+.tmp/
+# Docker
+.dockerignore
+docker-compose.yml
+# OS files
+.DS_Store
+Thumbs.db
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+# Misc
+coverage/
+coverage-final.json
+nyc_output/
+reports/
+# npm
+package-lock.json
+# lock files
+yarn.lock
+.pnpm-lock.yaml
+# others
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Optional: ignore Docker image artifacts
+hostel-backend:latest

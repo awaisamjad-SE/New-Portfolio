@@ -22,72 +22,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <body style="background-color: #111">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-<script>
-(async function () {
-  console.log("✅ Tracking initialized...");
 
-  const WEB_ID = "awaisamjad.me"; // Set your domain or unique ID
-  const startTime = Date.now();
-  let clickCount = 0;
-
-  function getDeviceId() {
-    let id = localStorage.getItem("analytics_device_id");
-    if (!id) {
-      id = "device-" + Math.random().toString(36).substr(2, 10);
-      localStorage.setItem("analytics_device_id", id);
-    }
-    return id;
-  }
-
-  const deviceId = getDeviceId();
-
-  // Count clicks
-  document.addEventListener("click", () => {
-    clickCount++;
-  });
-
-  // Optional: Fetch GeoIP info from public IP services
-  let locationInfo = {};
-  try {
-    const res = await fetch("https://ipinfo.io/json?token=098e59b6306494"); // Replace with real token
-    if (res.ok) {
-      locationInfo = await res.json();
-    }
-  } catch (err) {
-    console.warn("🌐 Failed to get location info:", err);
-  }
-
-  window.addEventListener("beforeunload", () => {
-    const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-
-    const payload = {
-      web_id: WEB_ID,
-      device_id: deviceId,
-      pageUrl: window.location.href,
-      referrer: document.referrer,
-      screenResolution: `${window.screen.width}x${window.screen.height}`,
-      deviceType: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
-      language: navigator.language,
-      browser: navigator.userAgent,
-      utmParams: {},
-      timeOnPage: timeSpent,
-      clicks: clickCount,
-      ip: locationInfo.ip || "", // Optional if backend grabs IP
-      locationInfo: locationInfo || {}
-    };
-
-    console.log("📦 Sending payload...", payload);
-
-    try {
-      const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
-      navigator.sendBeacon("https://octopus-app-qevgj.ondigitalocean.app/api/track/", blob);
-    } catch (e) {
-      console.error("❌ Failed to send tracking data:", e);
-    }
-  });
-
-  console.log("✅ Tracking script loaded.");
-})();
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-NN6VJPZVXH"></script>
 <script>

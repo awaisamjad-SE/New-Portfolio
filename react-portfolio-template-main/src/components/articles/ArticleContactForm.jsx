@@ -20,7 +20,6 @@ function ArticleContactForm({ data }) {
 
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
-    const [subject, setSubject] = useState('')
     const [message, setMessage] = useState('')
     const [didSubmitMessage, setDidSubmitMessage] = useState(false)
 
@@ -37,7 +36,6 @@ function ArticleContactForm({ data }) {
         }
         setName('')
         setEmail('')
-        setSubject('')
     }
 
     const _onSubmitButton = (e) => {
@@ -59,12 +57,19 @@ function ArticleContactForm({ data }) {
 
         window.scrollTo({top: 260, behavior: 'instant'})
 
-        const success = await emails.sendContactEmail(name, email, subject, message)
-        if(success) {
+        // Send only name, email and message (no subject)
+        const result = await emails.sendContactEmail(name, email, message)
+        if(result && result.ok) {
             _onSubmitSuccess()
         }
         else {
-            _onSubmitError()
+            // Show error details if available (helpful for debugging webhook issues)
+            const errorMessage = (result && result.error) ? result.error : null
+            if(errorMessage) {
+                displayNotification('error', getString('uhOh'), errorMessage)
+            } else {
+                _onSubmitError()
+            }
         }
     }
 
@@ -103,13 +108,7 @@ function ArticleContactForm({ data }) {
                                    placeholder={getString('email')}
                                    required={true}/>
 
-                        <FormInput id={`subject`}
-                                   type={`text`}
-                                   value={subject}
-                                   valueSetter={setSubject}
-                                   faIcon={`fa-solid fa-pen-to-square`}
-                                   placeholder={getString('subject')}
-                                   required={true}/>
+                        {/* Subject removed — contact form sends only name, email and message */}
                     </Col>
 
                     <Col className={`col-12 col-xl-6 d-flex`}>

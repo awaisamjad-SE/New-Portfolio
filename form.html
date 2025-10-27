@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact Us</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; padding: 24px; background:#f7f8fb; color:#222; }
+    .card { max-width:640px; margin:0 auto; background:#fff; padding:20px; border-radius:10px; box-shadow:0 6px 18px rgba(20,20,40,0.06); }
+    label { display:block; margin:12px 0 6px; font-weight:600; font-size:14px; }
+    input[type="text"], input[type="email"], textarea {
+      width:100%; padding:10px; border:1px solid #dfe3ea; border-radius:6px; font-size:14px;
+      box-sizing:border-box;
+    }
+    textarea { min-height:120px; resize:vertical; }
+    .row { display:flex; gap:12px; }
+    .btn { display:inline-block; margin-top:12px; padding:10px 16px; border-radius:8px; background:#2563eb; color:#fff; border:none; cursor:pointer; font-weight:600; }
+    .btn[disabled] { opacity:.6; cursor:not-allowed; }
+    .muted { color:#6b7280; font-size:13px; margin-top:6px; }
+    .message { margin-top:12px; padding:10px; border-radius:8px; }
+    .success { background: #ecfdf5; color: #065f46; border:1px solid #bbf7d0; }
+    .error { background: #fff1f2; color: #9f1239; border:1px solid #fecaca; }
+    /* hide honeypot from humans */
+    .hp { position: absolute; left: -10000px; top: auto; width:1px; height:1px; overflow:hidden; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Contact Us</h1>
+    <p class="muted">Have a question? Send us a message and we’ll reply soon.</p>
+
+    <!-- Modern JS form (preferred) -->
+    <form id="contactForm" novalidate>
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" required placeholder="Your full name" />
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required placeholder="you@example.com" />
+
+      <label for="message">Message</label>
+      <textarea id="message" name="message" required placeholder="Write your message..."></textarea>
+
+      <!-- Honeypot (anti-spam) - must be left empty by humans -->
+      <div class="hp" aria-hidden="true">
+        <label for="website">Website</label>
+        <input id="website" name="website" type="text" autocomplete="off" />
+      </div>
+
+      <div class="row" style="align-items:center">
+        <button id="submitBtn" class="btn" type="submit">Send Message</button>
+        <div id="status" style="flex:1"></div>
+      </div>
+    </form>
+
+    <!-- Non-JS fallback: posts form data as application/x-www-form-urlencoded -->
+    <noscript>
+      <form action="https://n8n.awaisamjad.me/webhook-test/contact-form" method="POST">
+        <input name="name" placeholder="Your name" required />
+        <input name="email" type="email" placeholder="you@example.com" required />
+        <textarea name="message" placeholder="Your message" required></textarea>
+        <button type="submit" class="btn">Send (No-JS)</button>
+      </form>
+    </noscript>
+  </div>
+
+  <script>
+    (function() {
+      const form = document.getElementById('contactForm');
+      const btn = document.getElementById('submitBtn');
+      const statusWrap = document.getElementById('status');
+      const WEBHOOK_URL = 'https://n8n.awaisamjad.me/webhook-test/contact-form';
+
+      function showMessage(text, kind = 'success') {
+        statusWrap.innerHTML = '';
+        const div = document.createElement('div');
+        div.className = 'message ' + (kind === 'error' ? 'error' : 'success');
+        div.textContent = text;
+        statusWrap.appendChild(div);
+      }
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        // basic validation
+        const name = form.name.value.trim();
+        const email = form.email.value.trim();
+        const message = form.message.value.trim();
+        const honeypot = form.website.value.trim(); // should be empty
+
+        if (honeypot) {
+          // silently drop or show generic message to avoid giving away spam protection
+          showMessage('Thanks for your message.', 'success');
+          form.reset();
+          return;
+        }
+
+        if (!name || !email || !message) {
+          showMessage('Please fill all required fields.', 'error');
+          return;
+        }
+
+        // disable UI
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+        showMessage('Sending — please wait...', 'success');
+
+        try {
+          const payload = { name, email, message, page: window.location.href, ua: navigator.userAgent };
+
+          const res = await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          // if n8n responds with JSON message, show it
+          if (res.ok) {
+            let data;
+            try { data = await res.json(); } catch (err) { data = null; }
+            const replyText = (data && data.message) ? data.message : 'Thanks for contacting us! We’ll reply to you soon.';
+            showMessage(replyText, 'success');
+            form.reset();
+          } else {
+            // try to read error body
+            let text;
+            try { text = await res.text(); } catch (_) { text = ''; }
+            showMessage('There was an error sending your message. Please try again later.', 'error');
+            console.error('Webhook error', res.status, text);
+          }
+        } catch (err) {
+          console.error(err);
+          showMessage('Network error. Please check your connection and try again.', 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Send Message';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
