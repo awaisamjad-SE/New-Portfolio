@@ -46,12 +46,27 @@ export const getStudents = async (req, res, next) => {
 export const getStudentById = async (req, res, next) => {
   try {
     const id = req.params.id;
-    // If student role, ensure they are requesting their own record
-    if (req.user.role === 'student' && String(req.user.id) !== String(id)) {
-      return errorResponse(res, 'Access denied', 403);
+    // Determine whether the param is a Mongo ObjectId (24 hex chars)
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
+    // If student role, ensure they are requesting their own record. Compare against both
+    // the Mongo _id (req.user.id) and the custom student_id (req.user.student_id).
+    if (req.user.role === 'student') {
+      const isOwnByObjectId = req.user.id && isObjectId && String(req.user.id) === String(id);
+      const isOwnByStudentId = req.user.student_id && String(req.user.student_id) === String(id);
+      if (!isOwnByObjectId && !isOwnByStudentId) {
+        return errorResponse(res, 'Access denied', 403);
+      }
     }
 
-    const student = await Student.findById(id).select('-password');
+    // Fetch by ObjectId when appropriate, otherwise look up by student_id
+    let student;
+    if (isObjectId) {
+      student = await Student.findById(id).select('-password');
+    } else {
+      student = await Student.findOne({ student_id: id }).select('-password');
+    }
+
     if (!student) return errorResponse(res, 'Student not found', 404);
     return successResponse(res, 'Student record', student);
   } catch (err) {

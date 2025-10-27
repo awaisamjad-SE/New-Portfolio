@@ -2,9 +2,14 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-const uri = process.env.MONGO_URI || "mongodb+srv://awaisamjad:JuGujylg9ToHSI8x@cluster0.zmzyi.mongodb.net/";
+const uri = process.env.MONGO_URI;
 
 export const connectDB = async () => {
+  if (!uri) {
+    console.error("❌ MONGO_URI is not set. Set the MONGO_URI environment variable or add it to a local .env file (do NOT commit secrets).\nSee .env.example for the required variables.");
+    process.exit(1);
+  }
+
   try {
     await mongoose.connect(uri, {
       dbName: process.env.DB_NAME || "HostelDB",
