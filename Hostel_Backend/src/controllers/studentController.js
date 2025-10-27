@@ -3,6 +3,10 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Joi from 'joi';
 import { successResponse, errorResponse } from "../utils/responseHandler.js";
+import { sendMail } from '../utils/mail.js';
+import { welcomeTemplate, loginSuccessTemplate } from '../utils/emailTemplates.js';
+import { getClientIp, fetchIpInfo } from '../utils/ipinfo.js';
+import { notify } from '../utils/notifier.js';
 
 const createSchema = Joi.object({
   student_id: Joi.string().required(),
@@ -28,6 +32,13 @@ export const createStudent = async (req, res, next) => {
     const student = new Student({ ...value, password: hashed, added_by: req.user ? req.user.id : null });
     await student.save();
 
+    // Send welcome email to student (non-blocking) and log it
+    try {
+      await notify({ to: student.email, subject: 'Welcome to Hostel Portal', html: welcomeTemplate({ name: student.name, id: student.student_id, role: 'student' }), meta: { type: 'welcome', studentId: student.student_id } });
+    } catch (e) {
+      console.error('Failed to send welcome email to student', e);
+    }
+
     return successResponse(res, 'Student created', { id: student._id }, 201);
   } catch (err) {
     next(err);
@@ -49,9 +60,12 @@ export const getStudentById = async (req, res, next) => {
     // Determine whether the param is a Mongo ObjectId (24 hex chars)
     const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
 
+    // Ensure token is present
+    if (!req.user) return errorResponse(res, 'Unauthorized - token required', 401);
+
     // If student role, ensure they are requesting their own record. Compare against both
     // the Mongo _id (req.user.id) and the custom student_id (req.user.student_id).
-    if (req.user.role === 'student') {
+    if (req.user && req.user.role === 'student') {
       const isOwnByObjectId = req.user.id && isObjectId && String(req.user.id) === String(id);
       const isOwnByStudentId = req.user.student_id && String(req.user.student_id) === String(id);
       if (!isOwnByObjectId && !isOwnByStudentId) {
@@ -129,7 +143,18 @@ export const loginStudent = async (req, res, next) => {
   // include both Mongo _id and student_id in the token so student can authenticate using either
   const token = jwt.sign({ id: student._id, student_id: student.student_id, role: 'student', email: student.email }, process.env.JWT_SECRET || 'secret', { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
 
-    return successResponse(res, 'Login successful', { token });
+  // Send login notification with geo/ip info (non-blocking) and log it
+  try {
+    const ip = getClientIp(req);
+    const ipInfo = await fetchIpInfo(ip);
+    await notify({ to: student.email, subject: 'Successful login', html: loginSuccessTemplate({ name: student.name, when: new Date().toUTCString(), ipInfo }), meta: { type: 'login', ip: ipInfo, studentId: student.student_id } });
+  } catch (e) {
+    console.error('Failed to send login email to student', e);
+  }
+
+  // Return token plus basic student info (including role, student_id and name)
+  const payload = { token, user: { id: student._id, student_id: student.student_id, name: student.name, email: student.email, role: 'student' } };
+  return successResponse(res, 'Login successful', payload);
   } catch (err) {
     next(err);
   }

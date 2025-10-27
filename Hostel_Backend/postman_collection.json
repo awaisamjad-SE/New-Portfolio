@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "7b0dc746-828a-4510-9fff-b0a63422ae35",
-		"name": "🏠 Hostel Management Backend (Professional v2.2)",
-		"description": "📘 Full-featured API Collection for Hostel Management System.\n\n👨‍💼 Admin APIs → Full CRUD access.\n👨‍🎓 Student APIs → Limited self-access (profile, meals, payments).\n\n🔒 Uses Bearer {{Token}} authentication.\n🌍 Supports environment variables (.env-style).",
+		"name": "🏠 Hostel Management Backend",
+		"description": "📘 Full-featured API Collection for Hostel Management System.\n\nIncludes admin, student, food items, daily meals and payments endpoints. Uses Bearer {{Token}} / {{student_Token}} authentication.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "38859193"
 	},
@@ -14,13 +14,11 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"// ✅ Auto-save Token after Login",
+							"// Auto-save Token after Login (handles both legacy and new response shape)",
 							"if (pm.response.code === 200) {",
-							"   const res = pm.response.json();",
-							"   if (res.token) {",
-							"       pm.environment.set('Token', res.token);",
-							"       console.log('✅ Admin token saved to environment');",
-							"   }",
+							"  const res = pm.response.json();",
+							"  const token = (res && res.data && res.data.token) || res.token || (res && res.data && res.data.user && res.data.user.token);",
+							"  if (token) pm.environment.set('Token', token);",
 							"}"
 						],
 						"type": "text/javascript"
@@ -29,410 +27,317 @@
 			],
 			"request": {
 				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin@123\"\n}"
-				},
-				"url": {
-					"raw": "{{base_url}}/admin/login",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"admin",
-						"login"
-					]
-				},
-				"description": "Admin login to get a new Bearer Token (stored automatically as {{Token}})."
-			},
-			"response": []
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin@123\"\n}" },
+				"url": { "raw": "{{base_url}}/admin/login", "host": ["{{base_url}}"], "path": ["admin", "login"] },
+				"description": "Admin login to get a Bearer token (saved as {{Token}})."
+			}
 		},
 		{
-			"name": "🧑‍💼 Admin - Create New Admin",
+			"name": "🧑‍💼 Admin - Create New Admin (main_admin)",
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{Token}}",
-							"type": "string"
-						}
-					]
-				},
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
 				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"admin_id\": \"ADM{{$randomInt}}\",\n  \"name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"password\": \"Secure@123\"\n}"
-				},
-				"url": {
-					"raw": "{{base_url}}/admin/create",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"admin",
-						"create"
-					]
-				},
-				"description": "Add a new admin (only accessible to super admins)."
-			},
-			"response": []
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"admin_id\": \"ADM{{$randomInt}}\",\n  \"name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"password\": \"Secure@123\",\n  \"role\": \"admin\"\n}" },
+				"url": { "raw": "{{base_url}}/admin/create", "host": ["{{base_url}}"], "path": ["admin", "create"] },
+				"description": "Create admin (requires main_admin role). Optional role field may be 'admin' or 'main_admin'."
+			}
 		},
 		{
-			"name": "🎓 Students - Create (Admin Only)",
+			"name": "🧑‍💼 Admin - Get All Admins (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "GET",
+				"url": { "raw": "{{base_url}}/admin/get", "host": ["{{base_url}}"], "path": ["admin", "get"] },
+				"description": "List all admin accounts (requires admin role)."
+			}
+		},
+		{
+			"name": "🧑‍💼 Admin - Update (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "PUT",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Name\",\n  \"role\": \"admin\"\n}" },
+				"url": { "raw": "{{base_url}}/admin/update/{{adminId}}", "host": ["{{base_url}}"], "path": ["admin", "update", "{{adminId}}"] },
+				"description": "Update an admin (main_admin only). Use {{adminId}} variable."
+			}
+		},
+		{
+			"name": "🧑‍💼 Admin - Delete (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "DELETE",
+				"url": { "raw": "{{base_url}}/admin/delete/{{adminId}}", "host": ["{{base_url}}"], "path": ["admin", "delete", "{{adminId}}"] },
+				"description": "Delete an admin account (main_admin only)."
+			}
+		},
+		{
+			"name": "🎓 Student - Create (admin)",
 			"event": [
 				{
 					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"// 🎲 Generate random Pakistani-style student info",
-							"const deptCodes = ['CS','EE','BME','ME'];",
-							"const randomDept = deptCodes[Math.floor(Math.random() * deptCodes.length)];",
-							"const randomDigits = Math.floor(1000000 + Math.random() * 9000000);",
-							"pm.variables.set('student_id', `2022${randomDept}${randomDigits}`);",
-							"pm.variables.set('student_email', `student${randomDigits}@example.pk`);"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
+					"script": { "exec": ["const dept = ['CS','EE','ME','BME'][Math.floor(Math.random()*4)]; const id = `2022${dept}${Math.floor(100000+Math.random()*900000)}`; pm.variables.set('student_id', id); pm.variables.set('student_email', `s${id}@example.com`);"], "type": "text/javascript" }
 				}
 			],
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{Token}}",
-							"type": "string"
-						}
-					]
-				},
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
 				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"student_id\": \"{{student_id}}\",\n  \"name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n  \"email\": \"{{student_email}}\",\n  \"password\": \"Stud@123\",\n  \"department\": \"Computer Science\"\n}"
-				},
-				"url": {
-					"raw": "{{base_url}}/students/create",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"students",
-						"create"
-					]
-				},
-				"description": "Admin creates a new student with auto-generated Pakistani ID & email."
-			},
-			"response": []
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"student_id\": \"{{student_id}}\",\n  \"name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n  \"email\": \"{{student_email}}\",\n  \"password\": \"Stud@123\",\n  \"department\": \"Computer Science\"\n}" },
+				"url": { "raw": "{{base_url}}/students/create", "host": ["{{base_url}}"], "path": ["students", "create"] },
+				"description": "Admin creates a new student."
+			}
 		},
 		{
-			"name": "🍛 FoodItems - Create (Admin)",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{Token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"food_id\": \"F{{$randomInt}}\",\n  \"name\": \"{{$randomElement 'Biryani','Qorma','Paratha','Chana','Kebab','Pulao'}}\",\n  \"category\": \"{{$randomElement 'Breakfast','Lunch','Dinner','Snack'}}\",\n  \"price\": {{$randomInt 80 350}}\n}"
-				},
-				"url": {
-					"raw": "{{base_url}}/fooditems/create",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"fooditems",
-						"create"
-					]
-				},
-				"description": "Add a random food item with local Pakistani names and prices."
-			},
-			"response": []
-		},
-		{
-			"name": "🍱 DailyMeals - Add (Admin)",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{Token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"student_id\": \"{{student_id}}\",\n  \"food_id\": \"F{{$randomInt}}\",\n  \"quantity\": {{$randomInt 1 3}},\n  \"date\": \"{{$isoTimestamp}}\"\n}"
-				},
-				"url": {
-					"raw": "{{base_url}}/dailymeals/add",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"dailymeals",
-						"add"
-					]
-				},
-				"description": "Assign daily meals to a student."
-			},
-			"response": []
-		},
-		{
-			"name": "💳 Payments - Generate (Admin)",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{Token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"student_id\": \"{{student_id}}\",\n  \"month\": \"{{$moment 'YYYY-MM'}}\",\n  \"total_food_price\": {{$randomInt 1000 4000}},\n  \"mess_service_charge\": {{$randomInt 1000 1500}},\n  \"variable_expenses\": {{$randomInt 100 500}}\n}"
-				},
-				"url": {
-					"raw": "{{base_url}}/payments/generate",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"payments",
-						"generate"
-					]
-				},
-				"description": "Generate monthly payment details for a student."
-			},
-			"response": []
-		},
-		{
-			"name": "👨‍🎓 Student - Login",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"// ✅ Save student token",
-							"if (pm.response.code === 200) {",
-							"   const res = pm.response.json();",
-							"   if (res.token) {",
-							"       pm.environment.set('student_Token', res.token);",
-							"       console.log('✅ Student token saved');",
-							"   }",
-							"}"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
+			"name": "🎓 Student - Login",
+				"event": [
+				{ "listen": "test", "script": { "exec": ["// Save student token (handles both legacy and new response shapes)", "if (pm.response.code === 200) { const res = pm.response.json(); const token = (res && res.data && res.data.token) || res.token || (res && res.data && res.data.user && res.data.user.token); if (token) pm.environment.set('student_Token', token); }"], "type": "text/javascript" } }
+	  ],
 			"request": {
 				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"email\": \"{{student_email}}\",\n  \"password\": \"Stud@123\"\n}"
-				},
-				"url": {
-					"raw": "{{base_url}}/students/login",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"students",
-						"login"
-					]
-				},
-				"description": "Student login to get their own Bearer token."
-			},
-			"response": []
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"email\": \"{{student_email}}\",\n  \"password\": \"Stud@123\"\n}" },
+				"url": { "raw": "{{base_url}}/students/login", "host": ["{{base_url}}"], "path": ["students", "login"] }
+			}
 		},
 		{
-			"name": "👨‍🎓 Student - Get Profile (Self)",
+			"name": "🎓 Student - Get All Students (admin)",
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{student_Token}}",
-							"type": "string"
-						}
-					]
-				},
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
 				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/students/get/{{student_id}}",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"students",
-						"get",
-						"{{student_id}}"
-					]
-				},
-				"description": "Get logged-in student's own profile (secured)."
-			},
-			"response": []
+				"url": { "raw": "{{base_url}}/students/get", "host": ["{{base_url}}"], "path": ["students", "get"] }
+			}
 		},
 		{
-			"name": "🍽️ Student - Get Meals (Self)",
+			"name": "🎓 Student - Get By ID (admin|student)",
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{student_Token}}",
-							"type": "string"
-						}
-					]
-				},
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{student_Token}}", "type": "string" }] },
 				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/dailymeals/get?student_id={{student_id}}",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"dailymeals",
-						"get"
-					],
-					"query": [
-						{
-							"key": "student_id",
-							"value": "{{student_id}}"
-						}
-					]
-				},
-				"description": "Fetch meals for logged-in student."
-			},
-			"response": []
+				"url": { "raw": "{{base_url}}/students/get/{{student_id}}", "host": ["{{base_url}}"], "path": ["students", "get", "{{student_id}}"] },
+				"description": "Get a student by Mongo _id or student_id (self or admin)."
+			}
 		},
 		{
-			"name": "💰 Student - Get Payment Details (Self)",
+			"name": "🎓 Student - Update (admin)",
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{student_Token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/payments/get?student_id={{student_id}}",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"payments",
-						"get"
-					],
-					"query": [
-						{
-							"key": "student_id",
-							"value": "{{student_id}}"
-						}
-					]
-				},
-				"description": "Get payment info for current student."
-			},
-			"response": []
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "PUT",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Student\",\n  \"department\": \"Electronics\"\n}" },
+				"url": { "raw": "{{base_url}}/students/update/{{studentMongoId}}", "host": ["{{base_url}}"], "path": ["students", "update", "{{studentMongoId}}"] }
+			}
 		},
 		{
-			"name": "Get monthly report (admin)",
+			"name": "🎓 Student - Patch Status (admin)",
 			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"status\": \"active\"\n}" },
+				"url": { "raw": "{{base_url}}/students/status/{{studentMongoId}}", "host": ["{{base_url}}"], "path": ["students", "status", "{{studentMongoId}}"] }
+			}
+		},
+		{
+			"name": "🎓 Student - Delete (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "DELETE",
+				"url": { "raw": "{{base_url}}/students/delete/{{studentMongoId}}", "host": ["{{base_url}}"], "path": ["students", "delete", "{{studentMongoId}}"] }
+			}
+		},
+		{
+			"name": "🍛 FoodItems - Create (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"food_id\": \"F001\",\n  \"name\": \"Biryani\",\n  \"category\": \"Lunch\",\n  \"price\": 220\n}" },
+				"url": { "raw": "{{base_url}}/fooditems/create", "host": ["{{base_url}}"], "path": ["fooditems", "create"] }
+			}
+		},
+		{
+			"name": "🍛 FoodItems - Get All (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
 				"method": "GET",
-				"header": []
-			},
-			"response": []
+				"url": { "raw": "{{base_url}}/fooditems/get", "host": ["{{base_url}}"], "path": ["fooditems", "get"] }
+			}
+		},
+		{
+			"name": "🍛 FoodItems - Update (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "PUT",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"price\": 250\n}" },
+				"url": { "raw": "{{base_url}}/fooditems/update/{{foodId}}", "host": ["{{base_url}}"], "path": ["fooditems", "update", "{{foodId}}"] }
+			}
+		},
+		{
+			"name": "🍛 FoodItems - Delete (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "DELETE",
+				"url": { "raw": "{{base_url}}/fooditems/delete/{{foodId}}", "host": ["{{base_url}}"], "path": ["fooditems", "delete", "{{foodId}}"] }
+			}
+		},
+		{
+			"name": "🍱 DailyMeals - Add (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"student_id\": \"{{student_id}}\",\n  \"food_id\": \"F001\",\n  \"quantity\": 1,\n  \"date\": \"2025-10-01T00:00:00.000Z\"\n}" },
+				"url": { "raw": "{{base_url}}/dailymeals/add", "host": ["{{base_url}}"], "path": ["dailymeals", "add"] }
+			}
+		},
+		{
+			"name": "🍱 DailyMeals - Get All (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "GET",
+				"url": { "raw": "{{base_url}}/dailymeals/get", "host": ["{{base_url}}"], "path": ["dailymeals", "get"] }
+			}
+		},
+		{
+			"name": "🍱 DailyMeals - Get By Student (admin|student)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{student_Token}}", "type": "string" }] },
+				"method": "GET",
+				"url": { "raw": "{{base_url}}/dailymeals/get/{{student_id}}", "host": ["{{base_url}}"], "path": ["dailymeals", "get", "{{student_id}}"] }
+			}
+		},
+		{
+			"name": "🍱 DailyMeals - Update (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "PUT",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"quantity\": 2\n}" },
+				"url": { "raw": "{{base_url}}/dailymeals/update/{{dailyMealId}}", "host": ["{{base_url}}"], "path": ["dailymeals", "update", "{{dailyMealId}}"] }
+			}
+		},
+		{
+			"name": "🍱 DailyMeals - Delete (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "DELETE",
+				"url": { "raw": "{{base_url}}/dailymeals/delete/{{dailyMealId}}", "host": ["{{base_url}}"], "path": ["dailymeals", "delete", "{{dailyMealId}}"] }
+			}
+		},
+		{
+			"name": "🍱 DailyMeals - Monthly Summary (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "GET",
+				"url": { "raw": "{{base_url}}/dailymeals/summary/2025-10", "host": ["{{base_url}}"], "path": ["dailymeals", "summary", "2025-10"] },
+				"description": "Summary of meals for specified month (YYYY-MM)."
+			}
+		},
+		{
+			"name": "🍱 DailyMeals - Popular Foods (admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "GET",
+				"url": { "raw": "{{base_url}}/dailymeals/popular/2025-10", "host": ["{{base_url}}"], "path": ["dailymeals", "popular", "2025-10"] }
+			}
+		},
+		{
+			"name": "💳 Payments - Generate (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"student_id\": \"{{student_id}}\",\n  \"month\": \"2025-10\"\n}" },
+				"url": { "raw": "{{base_url}}/payments/generate", "host": ["{{base_url}}"], "path": ["payments", "generate"] },
+				"description": "Generate payment for a student for a given month. Server computes total_food_price from daily meals if not supplied."
+			}
+		},
+		{
+			"name": "💳 Payments - Generate For All (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"month\": \"2025-10\"\n}" },
+				"url": { "raw": "{{base_url}}/payments/generate/all", "host": ["{{base_url}}"], "path": ["payments", "generate", "all"] }
+			}
+		},
+		{
+			"name": "💳 Payments - Get All (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "GET",
+				"url": { "raw": "{{base_url}}/payments/get", "host": ["{{base_url}}"], "path": ["payments", "get"] }
+			}
+		},
+		{
+			"name": "💳 Payments - Get By Student (admin|student)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{student_Token}}", "type": "string" }] },
+				"method": "GET",
+				"url": { "raw": "{{base_url}}/payments/get/{{student_id}}", "host": ["{{base_url}}"], "path": ["payments", "get", "{{student_id}}"] }
+			}
+		},
+		{
+			"name": "💳 Payments - Monthly Report (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "GET",
+				"url": { "raw": "{{base_url}}/payments/report/{{student_id}}/2025-10", "host": ["{{base_url}}"], "path": ["payments", "report", "{{student_id}}", "2025-10"] }
+			}
+		},
+		{
+			"name": "💳 Payments - Trend (admin|student)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{student_Token}}", "type": "string" }] },
+				"method": "GET",
+				"url": { "raw": "{{base_url}}/payments/trend/{{student_id}}", "host": ["{{base_url}}"], "path": ["payments", "trend", "{{student_id}}"] }
+			}
+		},
+		{
+			"name": "💳 Payments - Summary (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "GET",
+				"url": { "raw": "{{base_url}}/payments/summary", "host": ["{{base_url}}"], "path": ["payments", "summary"] }
+			}
+		},
+		{
+			"name": "💳 Payments - Mark Paid (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "PATCH",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"payment_mode\": \"bank_transfer\",\n  \"payment_reference\": \"REF12345\"\n}" },
+				"url": { "raw": "{{base_url}}/payments/pay/{{paymentId}}", "host": ["{{base_url}}"], "path": ["payments", "pay", "{{paymentId}}"] }
+			}
+		},
+		{
+			"name": "💳 Payments - Top Expenses (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "GET",
+				"url": { "raw": "{{base_url}}/payments/top/2025-10", "host": ["{{base_url}}"], "path": ["payments", "top", "2025-10"] }
+			}
+		},
+		{
+			"name": "💳 Payments - Update (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "PUT",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"variable_expenses\": 200\n}" },
+				"url": { "raw": "{{base_url}}/payments/update/{{paymentId}}", "host": ["{{base_url}}"], "path": ["payments", "update", "{{paymentId}}"] }
+			}
 		}
 	],
 	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:5000/api"
-		},
-		{
-			"key": "Token",
-			"value": ""
-		},
-		{
-			"key": "student_Token",
-			"value": ""
-		},
-		{
-			"key": "local_url",
-			"value": "",
-			"type": "default"
-		}
+		{ "key": "base_url", "value": "https://seashell-app-fuu8e.ondigitalocean.app/" },
+		{ "key": "Token", "value": "" },
+		{ "key": "student_Token", "value": "" },
+		{ "key": "local_url", "value": "", "type": "default" }
 	]
 }

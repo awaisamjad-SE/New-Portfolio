@@ -4,6 +4,8 @@ import DailyMeal from "../models/DailyMeal.js";
 import FoodItem from "../models/FoodItem.js";
 import Joi from 'joi';
 import { successResponse, errorResponse } from "../utils/responseHandler.js";
+import { notify } from '../utils/notifier.js';
+import { paymentNotificationTemplate } from '../utils/emailTemplates.js';
 
 const createSchema = Joi.object({
   student_id: Joi.string().required(),
@@ -45,6 +47,20 @@ export const generatePayment = async (req, res, next) => {
     const total = totalFood + (value.mess_service_charge || 0) + (value.variable_expenses || 0);
     const payment = new MonthlyPayment({ ...value, total_food_price: totalFood, total_amount: total, payment_status: 'pending' });
     await payment.save();
+    // Send payment notification to the student (non-blocking)
+    (async () => {
+      try {
+        const student = await Student.findOne({ student_id: payment.student_id }).lean();
+        if (student && student.email) {
+          const base = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+          const payUrl = `${base}/payments/pay/${payment._id}`;
+          await notify({ to: student.email, subject: `Payment generated for ${payment.month}`, html: paymentNotificationTemplate({ studentName: student.name, studentId: student.student_id, month: payment.month, total: payment.total_amount, payUrl, paymentId: payment._id }), meta: { type: 'payment-generated', paymentId: payment._id, studentId: student.student_id } });
+        }
+      } catch (e) {
+        console.error('Failed to send payment notification', e);
+      }
+    })();
+
     return successResponse(res, 'Payment generated', payment, 201);
   } catch (err) {
     next(err);
@@ -83,7 +99,8 @@ export const getMonthlyReport = async (req, res, next) => {
 export const getStudentPaymentsTrend = async (req, res, next) => {
   try {
     const sid = req.params.student_id;
-    if (req.user.role === 'student') {
+    if (!req.user) return errorResponse(res, 'Unauthorized - token required', 401);
+    if (req.user && req.user.role === 'student') {
       const allowed = String(req.user.id) === String(sid) || String(req.user.student_id) === String(sid);
       if (!allowed) return errorResponse(res, 'Access denied', 403);
     }
@@ -152,16 +169,45 @@ export const getTopExpenses = async (req, res, next) => {
 
 export const generatePaymentsForAll = async (req, res, next) => {
   try {
-    // naive: for each student create payment entry with defaults or calculated
-    const students = await Student.find();
+    // For each student, compute total_food_price from meals in the month and create payment & notify
+    const students = await Student.find().lean();
     const month = req.body.month;
-    if(!month) return errorResponse(res, 'Month is required', 400);
+    if (!month) return errorResponse(res, 'Month is required', 400);
+
+    const [y, m] = (month || '').split('-').map(Number);
+    if (!y || !m) return errorResponse(res, 'Invalid month format. Expected YYYY-MM', 400);
+    const start = new Date(Date.UTC(y, m - 1, 1));
+    const end = new Date(Date.UTC(y, m, 1));
 
     const payments = [];
-    for(const s of students) {
-      const payment = new MonthlyPayment({ student_id: s.student_id, month, total_amount: 0, payment_status: 'pending' });
-      await payment.save();
-      payments.push(payment);
+    for (const s of students) {
+      try {
+        const agg = await DailyMeal.aggregate([
+          { $match: { student_id: s.student_id, date: { $gte: start, $lt: end } } },
+          { $lookup: { from: 'fooditems', localField: 'food_id', foreignField: 'food_id', as: 'food' } },
+          { $unwind: { path: '$food', preserveNullAndEmptyArrays: true } },
+          { $addFields: { price: { $ifNull: ['$food.price', 0] }, line_total: { $multiply: ['$quantity', { $ifNull: ['$food.price', 0] }] } } },
+          { $group: { _id: null, total: { $sum: '$line_total' } } }
+        ]);
+        const totalFood = (agg && agg[0] && agg[0].total) ? agg[0].total : 0;
+        const totalAmount = totalFood; // mess_service_charge/variable_expenses not provided here
+        const payment = new MonthlyPayment({ student_id: s.student_id, month, total_food_price: totalFood, total_amount: totalAmount, payment_status: 'pending' });
+        await payment.save();
+        payments.push(payment);
+
+        // notify student if email present (non-blocking)
+        if (s.email) {
+          try {
+            const base = process.env.BASE_URL || (req ? `${req.protocol}://${req.get('host')}` : '');
+            const payUrl = `${base}/payments/pay/${payment._id}`;
+            await notify({ to: s.email, subject: `Payment generated for ${month}`, html: paymentNotificationTemplate({ studentName: s.name, studentId: s.student_id, month, total: payment.total_amount, payUrl, paymentId: payment._id }), meta: { type: 'payment-generated-bulk', paymentId: payment._id, studentId: s.student_id } });
+          } catch (e) {
+            console.error('Failed to send payment email for student', s.student_id, e);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to generate payment for student', s.student_id, e);
+      }
     }
     return successResponse(res, 'Payments generated for all students', payments, 201);
   } catch (err) {
@@ -181,7 +227,8 @@ export const getPayments = async (req, res, next) => {
 export const getPaymentsByStudent = async (req, res, next) => {
   try {
     const sid = req.params.student_id;
-    if (req.user.role === 'student') {
+    if (!req.user) return errorResponse(res, 'Unauthorized - token required', 401);
+    if (req.user && req.user.role === 'student') {
       const allowed = String(req.user.id) === String(sid) || String(req.user.student_id) === String(sid);
       if (!allowed) return errorResponse(res, 'Access denied', 403);
     }
@@ -197,6 +244,20 @@ export const updatePayment = async (req, res, next) => {
     const id = req.params.id;
     const update = req.body;
     const payment = await MonthlyPayment.findByIdAndUpdate(id, update, { new: true });
+    // Notify student about payment update (non-blocking)
+    (async () => {
+      try {
+        const student = await Student.findOne({ student_id: payment.student_id }).lean();
+        if (student && student.email) {
+          const base = process.env.BASE_URL || '';
+          const payUrl = `${base}/payments/pay/${payment._id}`;
+          await notify({ to: student.email, subject: `Payment updated for ${payment.month}`, html: paymentNotificationTemplate({ studentName: student.name, studentId: student.student_id, month: payment.month, total: payment.total_amount, payUrl, paymentId: payment._id }), meta: { type: 'payment-updated', paymentId: payment._id, studentId: student.student_id } });
+        }
+      } catch (e) {
+        console.error('Failed to send payment update email', e);
+      }
+    })();
+
     return successResponse(res, 'Payment updated', payment);
   } catch (err) {
     next(err);
