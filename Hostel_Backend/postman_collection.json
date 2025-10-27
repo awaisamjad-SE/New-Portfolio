@@ -1,102 +1,438 @@
 {
-  "info": {
-    "name": "Hostel Backend - Postman Collection",
-    "_postman_id": "a1b2c3d4-hostel-backend",
-    "description": "Collection for testing Hostel Management System APIs (local dev: http://localhost:5000)",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "Admin - Login",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"adminPassword\"\n}"
-        },
-        "url": { "raw": "http://localhost:5000/api/admin/login", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","admin","login"] }
-      },
-      "response": [
-        {
-          "name": "Login success (example)",
-          "originalRequest": {},
-          "status": "OK",
-          "code": 200,
-          "_body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": { \"token\": \"{{jwt}}\" }\n}"
-        }
-      ]
-    },
-    {
-      "name": "Admin - Create (admin only)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Authorization", "value": "Bearer {{jwt}}" }
-        ],
-        "body": { "mode": "raw", "raw": "{\n  \"admin_id\": \"ADM001\",\n  \"name\": \"Initial Admin\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"adminPassword\"\n}" },
-        "url": { "raw": "http://localhost:5000/api/admin/create", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","admin","create"] }
-      },
-      "response": [ { "name": "Admin created (example)", "originalRequest": {}, "status": "Created", "code": 201, "_body": "{\n  \"success\": true,\n  \"message\": \"Admin created\",\n  \"data\": { \"id\": \"<mongo_id>\" }\n}" } ]
-    },
-    {
-      "name": "Students - Create (admin)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Authorization", "value": "Bearer {{jwt}}" }
-        ],
-        "body": { "mode": "raw", "raw": "{\n  \"student_id\": \"STU002\",\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"pass123\",\n  \"department\": \"CSE\"\n}" },
-        "url": { "raw": "http://localhost:5000/api/students/create", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","students","create"] }
-      },
-      "response": [ { "name": "Student created (example)", "originalRequest": {}, "status": "Created", "code": 201, "_body": "{\n  \"success\": true,\n  \"message\": \"Student created\",\n  \"data\": { \"id\": \"<mongo_id>\" }\n}" } ]
-    },
-    {
-      "name": "Students - Get all (admin)",
-      "request": {
-        "method": "GET",
-        "header": [ { "key": "Authorization", "value": "Bearer {{jwt}}" } ],
-        "url": { "raw": "http://localhost:5000/api/students/get", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","students","get"] }
-      },
-      "response": [ { "name": "Students list (example)", "originalRequest": {}, "status": "OK", "code": 200, "_body": "{\n  \"success\": true,\n  \"message\": \"Students list\",\n  \"data\": [ { \"student_id\": \"STU002\", \"name\": \"John Doe\" } ]\n}" } ]
-    },
-    {
-      "name": "FoodItems - Create (admin)",
-      "request": {
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{jwt}}" } ],
-        "body": { "mode": "raw", "raw": "{\n  \"food_id\": \"F001\",\n  \"name\": \"Rice\",\n  \"category\": \"Main\",\n  \"price\": 60\n}" },
-        "url": { "raw": "http://localhost:5000/api/fooditems/create", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","fooditems","create"] }
-      },
-      "response": [ { "name": "Food created (example)", "originalRequest": {}, "status": "Created", "code": 201, "_body": "{\n  \"success\": true,\n  \"message\": \"Food item created\",\n  \"data\": { \"food_id\": \"F001\", \"name\": \"Rice\" }\n}" } ]
-    },
-    {
-      "name": "DailyMeals - Add (admin)",
-      "request": {
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{jwt}}" } ],
-        "body": { "mode": "raw", "raw": "{\n  \"student_id\": \"STU002\",\n  \"food_id\": \"F001\",\n  \"quantity\": 1,\n  \"date\": \"2025-10-27T00:00:00.000Z\"\n}" },
-        "url": { "raw": "http://localhost:5000/api/dailymeals/add", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","dailymeals","add"] }
-      },
-      "response": [ { "name": "Daily meal added (example)", "originalRequest": {}, "status": "Created", "code": 201, "_body": "{\n  \"success\": true,\n  \"message\": \"Daily meal added\",\n  \"data\": { \"student_id\": \"STU002\", \"food_id\": \"F001\" }\n}" } ]
-    },
-    {
-      "name": "Payments - Generate (admin)",
-      "request": {
-        "method": "POST",
-        "header": [ { "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{jwt}}" } ],
-        "body": { "mode": "raw", "raw": "{\n  \"student_id\": \"STU002\",\n  \"month\": \"2025-10\",\n  \"total_food_price\": 500,\n  \"mess_service_charge\": 1500,\n  \"variable_expenses\": 100\n}" },
-        "url": { "raw": "http://localhost:5000/api/payments/generate", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api","payments","generate"] }
-      },
-      "response": [ { "name": "Payment generated (example)", "originalRequest": {}, "status": "Created", "code": 201, "_body": "{\n  \"success\": true,\n  \"message\": \"Payment generated\",\n  \"data\": { \"student_id\": \"STU002\", \"month\": \"2025-10\" }\n}" } ]
-    }
-  ],
-  "event": [],
-  "variable": [
-    { "key": "jwt", "value": "<PASTE_YOUR_JWT_HERE>" }
-  ]
+	"info": {
+		"_postman_id": "7b0dc746-828a-4510-9fff-b0a63422ae35",
+		"name": "🏠 Hostel Management Backend (Professional v2.2)",
+		"description": "📘 Full-featured API Collection for Hostel Management System.\n\n👨‍💼 Admin APIs → Full CRUD access.\n👨‍🎓 Student APIs → Limited self-access (profile, meals, payments).\n\n🔒 Uses Bearer {{Token}} authentication.\n🌍 Supports environment variables (.env-style).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38859193"
+	},
+	"item": [
+		{
+			"name": "🔐 Admin - Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// ✅ Auto-save Token after Login",
+							"if (pm.response.code === 200) {",
+							"   const res = pm.response.json();",
+							"   if (res.token) {",
+							"       pm.environment.set('Token', res.token);",
+							"       console.log('✅ Admin token saved to environment');",
+							"   }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin@123\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/admin/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"admin",
+						"login"
+					]
+				},
+				"description": "Admin login to get a new Bearer Token (stored automatically as {{Token}})."
+			},
+			"response": []
+		},
+		{
+			"name": "🧑‍💼 Admin - Create New Admin",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"admin_id\": \"ADM{{$randomInt}}\",\n  \"name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"password\": \"Secure@123\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/admin/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"admin",
+						"create"
+					]
+				},
+				"description": "Add a new admin (only accessible to super admins)."
+			},
+			"response": []
+		},
+		{
+			"name": "🎓 Students - Create (Admin Only)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// 🎲 Generate random Pakistani-style student info",
+							"const deptCodes = ['CS','EE','BME','ME'];",
+							"const randomDept = deptCodes[Math.floor(Math.random() * deptCodes.length)];",
+							"const randomDigits = Math.floor(1000000 + Math.random() * 9000000);",
+							"pm.variables.set('student_id', `2022${randomDept}${randomDigits}`);",
+							"pm.variables.set('student_email', `student${randomDigits}@example.pk`);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"student_id\": \"{{student_id}}\",\n  \"name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n  \"email\": \"{{student_email}}\",\n  \"password\": \"Stud@123\",\n  \"department\": \"Computer Science\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/students/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"students",
+						"create"
+					]
+				},
+				"description": "Admin creates a new student with auto-generated Pakistani ID & email."
+			},
+			"response": []
+		},
+		{
+			"name": "🍛 FoodItems - Create (Admin)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"food_id\": \"F{{$randomInt}}\",\n  \"name\": \"{{$randomElement 'Biryani','Qorma','Paratha','Chana','Kebab','Pulao'}}\",\n  \"category\": \"{{$randomElement 'Breakfast','Lunch','Dinner','Snack'}}\",\n  \"price\": {{$randomInt 80 350}}\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/fooditems/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"fooditems",
+						"create"
+					]
+				},
+				"description": "Add a random food item with local Pakistani names and prices."
+			},
+			"response": []
+		},
+		{
+			"name": "🍱 DailyMeals - Add (Admin)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"student_id\": \"{{student_id}}\",\n  \"food_id\": \"F{{$randomInt}}\",\n  \"quantity\": {{$randomInt 1 3}},\n  \"date\": \"{{$isoTimestamp}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/dailymeals/add",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"dailymeals",
+						"add"
+					]
+				},
+				"description": "Assign daily meals to a student."
+			},
+			"response": []
+		},
+		{
+			"name": "💳 Payments - Generate (Admin)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"student_id\": \"{{student_id}}\",\n  \"month\": \"{{$moment 'YYYY-MM'}}\",\n  \"total_food_price\": {{$randomInt 1000 4000}},\n  \"mess_service_charge\": {{$randomInt 1000 1500}},\n  \"variable_expenses\": {{$randomInt 100 500}}\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/payments/generate",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"payments",
+						"generate"
+					]
+				},
+				"description": "Generate monthly payment details for a student."
+			},
+			"response": []
+		},
+		{
+			"name": "👨‍🎓 Student - Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// ✅ Save student token",
+							"if (pm.response.code === 200) {",
+							"   const res = pm.response.json();",
+							"   if (res.token) {",
+							"       pm.environment.set('student_Token', res.token);",
+							"       console.log('✅ Student token saved');",
+							"   }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"{{student_email}}\",\n  \"password\": \"Stud@123\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/students/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"students",
+						"login"
+					]
+				},
+				"description": "Student login to get their own Bearer token."
+			},
+			"response": []
+		},
+		{
+			"name": "👨‍🎓 Student - Get Profile (Self)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{student_Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/students/get/{{student_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"students",
+						"get",
+						"{{student_id}}"
+					]
+				},
+				"description": "Get logged-in student's own profile (secured)."
+			},
+			"response": []
+		},
+		{
+			"name": "🍽️ Student - Get Meals (Self)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{student_Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/dailymeals/get?student_id={{student_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"dailymeals",
+						"get"
+					],
+					"query": [
+						{
+							"key": "student_id",
+							"value": "{{student_id}}"
+						}
+					]
+				},
+				"description": "Fetch meals for logged-in student."
+			},
+			"response": []
+		},
+		{
+			"name": "💰 Student - Get Payment Details (Self)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{student_Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/payments/get?student_id={{student_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"payments",
+						"get"
+					],
+					"query": [
+						{
+							"key": "student_id",
+							"value": "{{student_id}}"
+						}
+					]
+				},
+				"description": "Get payment info for current student."
+			},
+			"response": []
+		},
+		{
+			"name": "Get monthly report (admin)",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000/api"
+		},
+		{
+			"key": "Token",
+			"value": ""
+		},
+		{
+			"key": "student_Token",
+			"value": ""
+		},
+		{
+			"key": "local_url",
+			"value": "",
+			"type": "default"
+		}
+	]
 }

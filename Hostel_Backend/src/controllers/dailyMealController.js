@@ -1,6 +1,7 @@
 import DailyMeal from "../models/DailyMeal.js";
 import Joi from 'joi';
 import { successResponse, errorResponse } from "../utils/responseHandler.js";
+import FoodItem from "../models/FoodItem.js";
 
 const createSchema = Joi.object({
   student_id: Joi.string().required(),
@@ -41,6 +42,75 @@ export const getMealsByStudent = async (req, res, next) => {
     }
     const meals = await DailyMeal.find({ student_id: sid });
     return successResponse(res, 'Student meals', meals);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateDailyMeal = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const update = req.body;
+    const meal = await DailyMeal.findByIdAndUpdate(id, update, { new: true });
+    return successResponse(res, 'Daily meal updated', meal);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteDailyMeal = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    await DailyMeal.findByIdAndDelete(id);
+    return successResponse(res, 'Daily meal deleted', null);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getMonthlyMealsSummary = async (req, res, next) => {
+  try {
+    const month = req.params.month;
+    if (!month) return errorResponse(res, 'Month is required', 400);
+    const [y, m] = (month || '').split('-').map(Number);
+    if (!y || !m) return errorResponse(res, 'Invalid month format. Expected YYYY-MM', 400);
+    const start = new Date(Date.UTC(y, m - 1, 1));
+    const end = new Date(Date.UTC(y, m, 1));
+
+    const agg = await DailyMeal.aggregate([
+      { $match: { date: { $gte: start, $lt: end } } },
+      { $lookup: { from: 'fooditems', localField: 'food_id', foreignField: 'food_id', as: 'food' } },
+      { $unwind: { path: '$food', preserveNullAndEmptyArrays: true } },
+      { $addFields: { price: { $ifNull: ['$food.price', 0] }, line_total: { $multiply: ['$quantity', { $ifNull: ['$food.price', 0] }] } } },
+      { $group: { _id: { day: { $dayOfMonth: '$date' } }, total_meals: { $sum: '$quantity' }, total_revenue: { $sum: '$line_total' } } },
+      { $sort: { '_id.day': 1 } }
+    ]);
+    return successResponse(res, 'Monthly meals summary', agg);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getPopularFoods = async (req, res, next) => {
+  try {
+    const month = req.params.month;
+    const topN = parseInt(req.query.n || '10', 10);
+    if (!month) return errorResponse(res, 'Month is required', 400);
+    const [y, m] = (month || '').split('-').map(Number);
+    if (!y || !m) return errorResponse(res, 'Invalid month format. Expected YYYY-MM', 400);
+    const start = new Date(Date.UTC(y, m - 1, 1));
+    const end = new Date(Date.UTC(y, m, 1));
+
+    const agg = await DailyMeal.aggregate([
+      { $match: { date: { $gte: start, $lt: end } } },
+      { $group: { _id: '$food_id', count: { $sum: '$quantity' } } },
+      { $sort: { count: -1 } },
+      { $limit: topN },
+      { $lookup: { from: 'fooditems', localField: '_id', foreignField: 'food_id', as: 'food' } },
+      { $unwind: { path: '$food', preserveNullAndEmptyArrays: true } },
+      { $project: { food_id: '$_id', name: '$food.name', count: 1 } }
+    ]);
+    return successResponse(res, 'Popular foods', agg);
   } catch (err) {
     next(err);
   }

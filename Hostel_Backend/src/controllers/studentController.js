@@ -100,6 +100,16 @@ export const patchStatus = async (req, res, next) => {
   }
 };
 
+export const deleteStudent = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    await Student.findByIdAndDelete(id);
+    return successResponse(res, 'Student deleted', null);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const loginSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required()

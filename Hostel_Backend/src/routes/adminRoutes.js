@@ -5,11 +5,13 @@ import { verifyRole } from '../middlewares/roleMiddleware.js';
 
 const router = express.Router();
 
-router.post('/create', verifyToken, verifyRole(['admin']), createAdmin);
+// Only a 'main_admin' may create other admins
+router.post('/create', verifyToken, verifyRole(['main_admin']), createAdmin);
 router.post('/login', loginAdmin); // login should be public
 
 router.get('/get', verifyToken, verifyRole(['admin']), getAdmins);
-router.put('/update/:id', verifyToken, verifyRole(['admin']), updateAdmin);
-router.delete('/delete/:id', verifyToken, verifyRole(['admin']), deleteAdmin);
+// Only main_admin can update or delete admin accounts
+router.put('/update/:id', verifyToken, verifyRole(['main_admin']), updateAdmin);
+router.delete('/delete/:id', verifyToken, verifyRole(['main_admin']), deleteAdmin);
 
 export default router;

@@ -15,7 +15,9 @@ const adminCreateSchema = Joi.object({
 
 export const createAdmin = async (req, res, next) => {
   try {
-    const { error, value } = adminCreateSchema.validate(req.body);
+    // Allow main_admin to optionally set the role when creating an admin
+    const schema = adminCreateSchema.keys({ role: Joi.string().valid('admin','main_admin').optional() });
+    const { error, value } = schema.validate(req.body);
     if (error) return errorResponse(res, error.details[0].message, 400);
 
     const existing = await Admin.findOne({ email: value.email });
@@ -23,7 +25,7 @@ export const createAdmin = async (req, res, next) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashed = await bcrypt.hash(value.password, salt);
-    const admin = new Admin({ ...value, password: hashed });
+  const admin = new Admin({ ...value, role: value.role || 'admin', password: hashed });
     await admin.save();
 
     return successResponse(res, 'Admin created', { id: admin._id }, 201);

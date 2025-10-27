@@ -1,5 +1,7 @@
 import MonthlyPayment from "../models/MonthlyPayment.js";
 import Student from "../models/Student.js";
+import DailyMeal from "../models/DailyMeal.js";
+import FoodItem from "../models/FoodItem.js";
 import Joi from 'joi';
 import { successResponse, errorResponse } from "../utils/responseHandler.js";
 
@@ -17,10 +19,132 @@ export const generatePayment = async (req, res, next) => {
     const { error, value } = createSchema.validate(req.body);
     if (error) return errorResponse(res, error.details[0].message, 400);
 
-    const total = (value.total_food_price || 0) + (value.mess_service_charge || 0) + (value.variable_expenses || 0);
-    const payment = new MonthlyPayment({ ...value, total_amount: total, payment_status: 'pending' });
+    // prevent duplicate payments for same student+month
+    const exists = await MonthlyPayment.findOne({ student_id: value.student_id, month: value.month });
+    if (exists) return errorResponse(res, 'Payment already generated for this student and month', 409);
+
+    // If total_food_price is not provided or is 0, compute it from DailyMeal + FoodItem prices
+    let totalFood = value.total_food_price || 0;
+    if (!totalFood || totalFood === 0) {
+      // parse month YYYY-MM
+      const [y, m] = (value.month || '').split('-').map(Number);
+      if (!y || !m) return errorResponse(res, 'Invalid month format. Expected YYYY-MM', 400);
+      const start = new Date(Date.UTC(y, m - 1, 1));
+      const end = new Date(Date.UTC(y, m, 1));
+
+      const agg = await DailyMeal.aggregate([
+        { $match: { student_id: value.student_id, date: { $gte: start, $lt: end } } },
+        { $lookup: { from: 'fooditems', localField: 'food_id', foreignField: 'food_id', as: 'food' } },
+        { $unwind: { path: '$food', preserveNullAndEmptyArrays: true } },
+        { $addFields: { price: { $ifNull: ['$food.price', 0] }, line_total: { $multiply: ['$quantity', { $ifNull: ['$food.price', 0] }] } } },
+        { $group: { _id: null, total: { $sum: '$line_total' } } }
+      ]);
+      totalFood = (agg && agg[0] && agg[0].total) ? agg[0].total : 0;
+    }
+
+    const total = totalFood + (value.mess_service_charge || 0) + (value.variable_expenses || 0);
+    const payment = new MonthlyPayment({ ...value, total_food_price: totalFood, total_amount: total, payment_status: 'pending' });
     await payment.save();
     return successResponse(res, 'Payment generated', payment, 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getMonthlyReport = async (req, res, next) => {
+  try {
+    const { student_id, month } = req.params;
+    if (!student_id || !month) return errorResponse(res, 'student_id and month are required', 400);
+
+    // admin-only endpoint (route should be protected)
+
+    // compute totals and return daily items
+    const [y, m] = (month || '').split('-').map(Number);
+    if (!y || !m) return errorResponse(res, 'Invalid month format. Expected YYYY-MM', 400);
+    const start = new Date(Date.UTC(y, m - 1, 1));
+    const end = new Date(Date.UTC(y, m, 1));
+
+    const items = await DailyMeal.aggregate([
+      { $match: { student_id, date: { $gte: start, $lt: end } } },
+      { $lookup: { from: 'fooditems', localField: 'food_id', foreignField: 'food_id', as: 'food' } },
+      { $unwind: { path: '$food', preserveNullAndEmptyArrays: true } },
+      { $project: { date: 1, food_id: 1, quantity: 1, price: { $ifNull: ['$food.price', 0] }, line_total: { $multiply: ['$quantity', { $ifNull: ['$food.price', 0] }] } } },
+      { $sort: { date: 1 } }
+    ]);
+
+    const totalFood = items.reduce((s, it) => s + (it.line_total || 0), 0);
+
+    return successResponse(res, 'Monthly report', { student_id, month, total_food_price: totalFood, items });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getStudentPaymentsTrend = async (req, res, next) => {
+  try {
+    const sid = req.params.student_id;
+    if (req.user.role === 'student') {
+      const allowed = String(req.user.id) === String(sid) || String(req.user.student_id) === String(sid);
+      if (!allowed) return errorResponse(res, 'Access denied', 403);
+    }
+
+    // group payments by month and sum
+    const agg = await MonthlyPayment.aggregate([
+      { $match: { student_id: sid } },
+      { $group: { _id: '$month', total_amount: { $sum: '$total_amount' }, count: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    ]);
+
+    return successResponse(res, 'Student payments trend', agg);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getPaymentsSummary = async (req, res, next) => {
+  try {
+    // admin endpoint - overall summary grouped by month
+    const agg = await MonthlyPayment.aggregate([
+      { $group: { _id: '$month', total_amount: { $sum: '$total_amount' }, payments: { $sum: 1 } } },
+      { $sort: { _id: -1 } }
+    ]);
+    return successResponse(res, 'Payments summary', agg);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const markPaymentPaid = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const { payment_mode, payment_reference, paid_at } = req.body;
+    const update = {
+      payment_status: 'paid',
+      payment_mode: payment_mode || 'unknown',
+      payment_reference: payment_reference || null,
+      paid_at: paid_at ? new Date(paid_at) : new Date(),
+      updated_by: req.user ? req.user.id : null
+    };
+    const payment = await MonthlyPayment.findByIdAndUpdate(id, update, { new: true });
+    return successResponse(res, 'Payment marked as paid', payment);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getTopExpenses = async (req, res, next) => {
+  try {
+    const month = req.params.month;
+    const topN = parseInt(req.query.n || '10', 10);
+    if (!month) return errorResponse(res, 'Month is required', 400);
+
+    const agg = await MonthlyPayment.aggregate([
+      { $match: { month } },
+      { $group: { _id: '$student_id', total_amount: { $sum: '$total_amount' } } },
+      { $sort: { total_amount: -1 } },
+      { $limit: topN }
+    ]);
+    return successResponse(res, 'Top expenses', agg);
   } catch (err) {
     next(err);
   }
