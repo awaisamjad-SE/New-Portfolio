@@ -5,6 +5,7 @@ import foodItemRoutes from "./routes/foodItemRoutes.js";
 import dailyMealRoutes from "./routes/dailyMealRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
+import notificationRoutes from './routes/notificationRoutes.js';
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use("/students", studentRoutes);
 app.use("/fooditems", foodItemRoutes);
 app.use("/dailymeals", dailyMealRoutes);
 app.use("/payments", paymentRoutes);
+app.use('/notifications', notificationRoutes);
 
 // health
 app.get('/', (req, res) => res.json({ success: true, message: 'Hostel API is running' }));

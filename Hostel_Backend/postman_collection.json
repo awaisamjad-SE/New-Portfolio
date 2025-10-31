@@ -34,6 +34,28 @@
 			}
 		},
 		{
+			"name": "🍱 DailyMeals - Send Monthly Reports (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"month\": \"2025-10\"\n}" },
+				"url": { "raw": "{{base_url}}/dailymeals/send/monthly", "host": ["{{base_url}}"], "path": ["dailymeals", "send", "monthly"] },
+				"description": "Trigger sending monthly meal reports to all students (main_admin only). Body: { month: 'YYYY-MM' }"
+			}
+		},
+		{
+			"name": "🍱 DailyMeals - Send Weekly Reports (main_admin)",
+			"request": {
+				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "application/json" }],
+				"body": { "mode": "raw", "raw": "{\n  \"startDate\": \"2025-10-20\"\n}" },
+				"url": { "raw": "{{base_url}}/dailymeals/send/weekly", "host": ["{{base_url}}"], "path": ["dailymeals", "send", "weekly"] },
+				"description": "Trigger sending weekly meal reports to all students (main_admin only). Body: { startDate: 'YYYY-MM-DD' }"
+			}
+		},
+		{
 			"name": "🧑‍💼 Admin - Create New Admin (main_admin)",
 			"request": {
 				"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
@@ -332,7 +354,25 @@
 				"body": { "mode": "raw", "raw": "{\n  \"variable_expenses\": 200\n}" },
 				"url": { "raw": "{{base_url}}/payments/update/{{paymentId}}", "host": ["{{base_url}}"], "path": ["payments", "update", "{{paymentId}}"] }
 			}
-		}
+		},
+		{
+				"name": "🔔 Notifications - Get Logs (admin|main_admin)",
+				"request": {
+					"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+					"method": "GET",
+					"url": { "raw": "{{base_url}}/notifications/logs?limit=20&page=1", "host": ["{{base_url}}"], "path": ["notifications", "logs"] },
+					"description": "List notification logs. Query params: status=sent|error|pending, limit, page"
+				}
+			},
+			{
+				"name": "🔔 Notifications - Get Log By ID (admin|main_admin)",
+				"request": {
+					"auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{Token}}", "type": "string" }] },
+					"method": "GET",
+					"url": { "raw": "{{base_url}}/notifications/logs/{{logId}}", "host": ["{{base_url}}"], "path": ["notifications", "logs", "{{logId}}"] },
+					"description": "Get a single notification log by its Mongo _id. Use {{logId}} variable from responses."
+				}
+			}
 	],
 	"variable": [
 		{ "key": "base_url", "value": "https://seashell-app-fuu8e.ondigitalocean.app/" },
